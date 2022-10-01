@@ -10,12 +10,15 @@ import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
+import lintfordpickle.ld51.controllers.EditorTrackController;
 import lintfordpickle.ld51.controllers.TrackController;
 import lintfordpickle.ld51.data.tracks.Track;
 import net.lintford.library.core.LintfordCore;
 import net.lintford.library.core.ResourceManager;
+import net.lintford.library.core.graphics.ColorConstants;
 import net.lintford.library.core.graphics.linebatch.LineBatch;
 import net.lintford.library.core.graphics.shaders.ShaderSubPixel;
+import net.lintford.library.core.graphics.textures.CoreTextureNames;
 import net.lintford.library.core.graphics.textures.Texture;
 import net.lintford.library.core.maths.Matrix4f;
 import net.lintford.library.renderers.BaseRenderer;
@@ -126,8 +129,6 @@ public class TrackRenderer extends BaseRenderer {
 
 		mShader.loadResources(resourceManager);
 
-		
-		
 		mTrackTexture = resourceManager.textureManager().loadTexture("TEXTURE_TRACK", "res/textures/textureTrack.png", GL11.GL_LINEAR, entityGroupID());
 		mTrackPropsTexture = resourceManager.textureManager().loadTexture("TEXTURE_TRACK_PROPS", "res/textures/textureTrackProps.png", GL11.GL_LINEAR, entityGroupID());
 		mTrackGrassTexture = resourceManager.textureManager().loadTexture("TEXTURE_TRACK_GRASS", "res/textures/textureTrackGrass.png", GL11.GL_LINEAR, entityGroupID());
@@ -228,6 +229,26 @@ public class TrackRenderer extends BaseRenderer {
 
 		mInnerWallLineBatch.end();
 		mOuterWallLineBatch.end();
+
+		drawDebugControlPoints(core);
+	}
+
+	private void drawDebugControlPoints(LintfordCore core) {
+		final var lFontUnit = rendererManager().uiTextFont();
+
+		lFontUnit.begin(core.gameCamera());
+
+		final var lTrack = mTrackController.currentTrack();
+		if (lTrack != null) {
+			final var lSplinePoints = lTrack.trackSpline().points();
+			final int lNumPoints = lSplinePoints.size();
+			for (int i = 0; i < lNumPoints; i++) {
+				final var lPoint = lSplinePoints.get(i);
+				lFontUnit.drawText(String.valueOf(i), lPoint.x + 5, lPoint.y + 5, -0.01f, 0.6f);
+			}
+		}
+
+		lFontUnit.end();
 	}
 
 	// ---------------------------------------------

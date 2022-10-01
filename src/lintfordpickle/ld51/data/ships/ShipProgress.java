@@ -8,8 +8,7 @@ public class ShipProgress {
 
 	public int shipIndex;
 	public int currentLapNumber;
-	public int lastVisitedNodeId;
-	public int nextControlNodeId;
+	public int currentNodeUid;
 	public int position;
 
 	public boolean hasShipFinished;

@@ -42,11 +42,10 @@ public class Ship extends CircleEntity {
 	public boolean gasDown;
 	public boolean isSteering;
 
-	// progress 
+	// progress
 	public float pointOnTrackX;
 	public float pointOnTrackY;
 	public float trackAngle;
-	public float aiHeadingAngle;
 
 	public float wheelBase;
 	public float heading;

@@ -66,4 +66,11 @@ public class ShipManager {
 		mShipsList.add(lPlayerShip);
 	}
 
+	public void createAiShips(int numberOfAiShips) {
+		for (int i = 0; i < numberOfAiShips; i++) {
+			final var lPlayerShip = new Ship(getShipPoolUid());
+			lPlayerShip.isPlayerControlled = false;
+			mShipsList.add(lPlayerShip);
+		}
+	}
 }

@@ -48,7 +48,6 @@ public class ShipRenderer extends BaseRenderer {
 		super(rendererManager, RENDERER_NAME, entityGroupID);
 
 		mTextureBatch = new SubPixelTextureBatch();
-
 	}
 
 	// ---------------------------------------------
@@ -134,7 +133,7 @@ public class ShipRenderer extends BaseRenderer {
 		Debug.debugManager().drawers().drawPointImmediate(core.gameCamera(), ship.rearWheelPosition.x, ship.rearWheelPosition.y);
 		Debug.debugManager().drawers().drawPointImmediate(core.gameCamera(), ship.frontWheelPosition.x, ship.frontWheelPosition.y);
 
-		// rear wheels 
+		// rear wheels
 		final var lRearWheelPosition = ship.rearWheelPosition;
 
 		final var lShipHeading = ship.heading;
@@ -157,6 +156,24 @@ public class ShipRenderer extends BaseRenderer {
 
 		Debug.debugManager().drawers().drawLineImmediate(core.gameCamera(), lFrontWheelPosition.x, lFrontWheelPosition.y, lShipFrontHeadingPosX, lShipFrontHeadingPosY);
 
-	}
+		final var lShipTrackGradient = ship.trackAngle;
+		final var lShipTrackGradientX = ship.pointOnTrackX + (float) Math.sin(lShipTrackGradient) * 10.f;
+		final var lShipTrackGradientY = ship.pointOnTrackY + (float) Math.cos(lShipTrackGradient) * 10.f;
 
+		Debug.debugManager().drawers().drawPointImmediate(core.gameCamera(), ship.pointOnTrackX, ship.pointOnTrackY);
+		Debug.debugManager().drawers().drawLineImmediate(core.gameCamera(), ship.pointOnTrackX, ship.pointOnTrackY, lShipTrackGradientX, lShipTrackGradientY);
+
+		if (ship.isPlayerControlled) {
+			final var lFontUnit = rendererManager().uiTextFont();
+			final var lBoundingBox = core.HUD().boundingRectangle();
+
+			float yPos = lBoundingBox.top() + 5.f;
+
+			lFontUnit.begin(core.HUD());
+			lFontUnit.drawText("current node: " + ship.shipProgress.currentNodeUid, lBoundingBox.left() + 5.f, yPos += 25f, -0.01f, 1.f);
+			lFontUnit.drawText("distance: " + ship.shipProgress.distanceIntoRace, lBoundingBox.left() + 5.f, yPos += 25f, -0.01f, 1.f);
+			lFontUnit.drawText("current lap: " + ship.shipProgress.currentLapNumber, lBoundingBox.left() + 5.f, yPos += 25f, -0.01f, 1.f);
+			lFontUnit.end();
+		}
+	}
 }
