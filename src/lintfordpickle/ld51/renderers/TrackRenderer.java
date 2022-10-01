@@ -14,6 +14,7 @@ import lintfordpickle.ld51.controllers.TrackController;
 import lintfordpickle.ld51.data.tracks.Track;
 import net.lintford.library.core.LintfordCore;
 import net.lintford.library.core.ResourceManager;
+import net.lintford.library.core.graphics.linebatch.LineBatch;
 import net.lintford.library.core.graphics.shaders.ShaderSubPixel;
 import net.lintford.library.core.graphics.textures.Texture;
 import net.lintford.library.core.maths.Matrix4f;
@@ -75,6 +76,9 @@ public class TrackRenderer extends BaseRenderer {
 
 	protected TrackController mTrackController;
 
+	protected LineBatch mInnerWallLineBatch;
+	protected LineBatch mOuterWallLineBatch;
+
 	// ---------------------------------------------
 	// Constructor
 	// ---------------------------------------------
@@ -85,6 +89,9 @@ public class TrackRenderer extends BaseRenderer {
 		mShader = new ShaderSubPixel("TrackShader", VERT_FILENAME, FRAG_FILENAME);
 
 		mModelMatrix = new Matrix4f();
+
+		mInnerWallLineBatch = new LineBatch();
+		mOuterWallLineBatch = new LineBatch();
 	}
 
 	// ---------------------------------------------
@@ -93,7 +100,6 @@ public class TrackRenderer extends BaseRenderer {
 
 	@Override
 	public boolean isInitialized() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
@@ -107,6 +113,9 @@ public class TrackRenderer extends BaseRenderer {
 	public void loadResources(ResourceManager resourceManager) {
 		super.loadResources(resourceManager);
 
+		mInnerWallLineBatch.loadResources(resourceManager);
+		mOuterWallLineBatch.loadResources(resourceManager);
+
 		final var lTrack = mTrackController.currentTrack();
 
 		if (mVaoId == -1)
@@ -117,6 +126,8 @@ public class TrackRenderer extends BaseRenderer {
 
 		mShader.loadResources(resourceManager);
 
+		
+		
 		mTrackTexture = resourceManager.textureManager().loadTexture("TEXTURE_TRACK", "res/textures/textureTrack.png", GL11.GL_LINEAR, entityGroupID());
 		mTrackPropsTexture = resourceManager.textureManager().loadTexture("TEXTURE_TRACK_PROPS", "res/textures/textureTrackProps.png", GL11.GL_LINEAR, entityGroupID());
 		mTrackGrassTexture = resourceManager.textureManager().loadTexture("TEXTURE_TRACK_GRASS", "res/textures/textureTrackGrass.png", GL11.GL_LINEAR, entityGroupID());
@@ -137,6 +148,8 @@ public class TrackRenderer extends BaseRenderer {
 		if (mVboId > -1)
 			GL15.glDeleteBuffers(mVboId);
 
+		mInnerWallLineBatch.unloadResources();
+		mOuterWallLineBatch.unloadResources();
 	}
 
 	@Override
@@ -166,7 +179,6 @@ public class TrackRenderer extends BaseRenderer {
 		mShader.modelMatrix(mModelMatrix);
 
 		GL11.glLineWidth(1);
-		GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_LINE);
 		mShader.bind();
 
 		GL11.glDrawArrays(GL11.GL_TRIANGLE_STRIP, 0, mVertexCount);
@@ -176,14 +188,53 @@ public class TrackRenderer extends BaseRenderer {
 		GL30.glBindVertexArray(0);
 
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
-		GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
+
+		// TEST
+		final var lInnerVertices = mTrackController.innerTrackVertices();
+		final var lOuterVertices = mTrackController.outerTrackVertices();
+
+		float lCurX = 0.f;
+		float lCurY = 0.f;
+		float lPrevX = 0.f;
+		float lPrevY = 0.f;
+
+		float lDistanceTravelled = 0.f;
+		float lLengthOfSegment = 0.f;
+
+		mInnerWallLineBatch.lineType(GL11.GL_LINE_STRIP);
+		mInnerWallLineBatch.lineWidth(4);
+		mOuterWallLineBatch.lineType(GL11.GL_LINE_STRIP);
+		mOuterWallLineBatch.lineWidth(4);
+
+		mInnerWallLineBatch.begin(core.gameCamera());
+		mOuterWallLineBatch.begin(core.gameCamera());
+
+		final int lNumSplinePoints = lInnerVertices.length;
+		for (int i = 0; i < lNumSplinePoints; i++) {
+			lCurX = lInnerVertices[i].x;
+			lCurY = lInnerVertices[i].y;
+
+			lLengthOfSegment = Vector2f.distance(lCurX, lCurY, lPrevX, lPrevY) / 1024.f;
+			lDistanceTravelled += lLengthOfSegment;
+
+			final float lInnerPointX = lInnerVertices[i].x;
+			final float lInnerPointY = lInnerVertices[i].y;
+			final float lOuterPointX = lOuterVertices[i].x;
+			final float lOuterPointY = lOuterVertices[i].y;
+
+			mInnerWallLineBatch.draw(lInnerPointX, lInnerPointY, -0.01f, 0.9f, .9f, .9f, 1.f);
+			mOuterWallLineBatch.draw(lOuterPointX, lOuterPointY, -0.01f, 0.9f, .9f, .9f, 1.f);
+		}
+
+		mInnerWallLineBatch.end();
+		mOuterWallLineBatch.end();
 	}
 
 	// ---------------------------------------------
 	// Methods
 	// ---------------------------------------------
 
-	private void loadTrackMesh(Track track) {
+	protected void loadTrackMesh(Track track) {
 		if (track == null)
 			return;
 
@@ -207,7 +258,7 @@ public class TrackRenderer extends BaseRenderer {
 		mIsTrackGenerated = true;
 	}
 
-	public void buildTrackMesh(Track track) {
+	private void buildTrackMesh(Track track) {
 		final var lInnerVertices = mTrackController.innerTrackVertices();
 		final var lOuterVertices = mTrackController.outerTrackVertices();
 

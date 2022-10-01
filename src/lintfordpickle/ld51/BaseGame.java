@@ -98,7 +98,7 @@ public class BaseGame extends LintfordCore {
 		super(pGameInfo, pArgs, false);
 
 		mEntityGroupID = RandomNumbers.RANDOM.nextInt();
-		mIsFixedTimeStep = true;
+		mIsFixedTimeStep = false;
 
 		mScreenManager = new ScreenManager(this);
 	}

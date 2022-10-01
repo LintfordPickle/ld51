@@ -3,8 +3,10 @@ package lintfordpickle.ld51.controllers;
 import java.util.ArrayList;
 import java.util.List;
 
+import lintfordpickle.ld51.ConstantsGame;
 import lintfordpickle.ld51.data.tracks.GameFileHeader;
 import lintfordpickle.ld51.data.tracks.Track;
+import lintfordpickle.ld51.data.tracks.TrackDefinition;
 import net.lintford.library.controllers.BaseController;
 import net.lintford.library.controllers.core.ControllerManager;
 import net.lintford.library.core.LintfordCore;
@@ -20,17 +22,18 @@ public class TrackController extends BaseController {
 
 	public static final String CONTROLLER_NAME = "Track Controller";
 
-	private float mSegmentWidth = 10f;
-	private float mTrackScale = .5f;
-	private Vector2f[] mInnerVertices;
-	private Vector2f[] mOuterVertices;
+	protected float mSegmentWidth = ConstantsGame.TRACK_SEG_REG_WIDTH;
+	protected float mTrackScale = 1.f;
+
+	protected Vector2f[] mInnerVertices;
+	protected Vector2f[] mOuterVertices;
 
 	// ---------------------------------------------
 	// Variables
 	// ---------------------------------------------{
 
-	private GameFileHeader mGameFileHeader;
-	private Track mTrack;
+	protected GameFileHeader mGameFileHeader;
+	protected Track mTrack;
 
 	// ---------------------------------------------
 	// Properties
@@ -62,7 +65,9 @@ public class TrackController extends BaseController {
 
 		mGameFileHeader = gameFileHeader;
 		mTrack = new Track();
-		mTrack.loadTrackDefinitionFromFile(mGameFileHeader.trackFilename());
+
+		if (mGameFileHeader.isValid())
+			mTrack.loadTrackDefinitionFromFile(mGameFileHeader.trackFilename());
 	}
 
 	// ---------------------------------------------
@@ -71,10 +76,7 @@ public class TrackController extends BaseController {
 
 	@Override
 	public void initialize(LintfordCore core) {
-		final var lHiResSpline = getHiResSpline(mTrack.trackSpline());
-
-		mTrack.hiResTrackSpline(lHiResSpline);
-		buildTrackCollisionVertices(lHiResSpline);
+		buildHiResolutionTrack();
 	}
 
 	@Override
@@ -104,7 +106,7 @@ public class TrackController extends BaseController {
 			lNewSplinePoints.add(lNewSplinePoint);
 
 			float lSegmentLength = pSpline.calculateSegmentLength((int) t);
-			float lStepSize = 0.5f / (lSegmentLength / 5.f);
+			float lStepSize = 3.f / (lSegmentLength / 5.f);
 
 			if (t < 5)
 				System.out.println("block length (" + (int) t + "/" + t + "): " + lStepSize + "  (" + lSegmentLength + ")");
@@ -160,5 +162,33 @@ public class TrackController extends BaseController {
 		// close loop
 		mInnerVertices[lNumSplinePoints] = mInnerVertices[0];
 		mOuterVertices[lNumSplinePoints] = mOuterVertices[0];
+	}
+
+	public TrackDefinition createDefaultTrackDefinition() {
+		final int lDefautlNumControlPoints = 20;
+
+		final var lControlPointsX = new float[lDefautlNumControlPoints];
+		final var lControlPointsY = new float[lDefautlNumControlPoints];
+
+		final var lOriginX = 0.f;
+		final var lOriginY = 0.f;
+
+		final var lRadius = 25.f;
+
+		for (int i = 0; i < lDefautlNumControlPoints; i++) {
+			final float lNormalizedI = (float) i / lDefautlNumControlPoints;
+			lControlPointsX[i] = lOriginX + lRadius * (float) Math.cos(lNormalizedI * Math.PI * 2.f);
+			lControlPointsY[i] = lOriginY + lRadius * (float) Math.sin(lNormalizedI * Math.PI * 2.f);
+		}
+
+		final var lNewTrackDefinition = new TrackDefinition(lControlPointsX, lControlPointsY);
+		return lNewTrackDefinition;
+	}
+
+	protected void buildHiResolutionTrack() {
+		final var lHiResSpline = getHiResSpline(mTrack.trackSpline());
+
+		mTrack.hiResTrackSpline(lHiResSpline);
+		buildTrackCollisionVertices(lHiResSpline);
 	}
 }

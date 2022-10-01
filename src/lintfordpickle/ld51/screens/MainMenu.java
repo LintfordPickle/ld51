@@ -16,7 +16,6 @@ public class MainMenu extends MenuScreen {
 	private static final int SCREEN_BUTTON_PLAY = 10;
 	private static final int SCREEN_BUTTON_OPTIONS = 11;
 	private static final int SCREEN_BUTTON_EDITOR = 13;
-	private static final int SCREEN_BUTTON_CREDITS = 14;
 	private static final int SCREEN_BUTTON_EXIT = 15;
 
 	// ---------------------------------------------
@@ -38,9 +37,6 @@ public class MainMenu extends MenuScreen {
 		final var lOptionsEntry = new MenuEntry(mScreenManager, lLayout, "Options");
 		lOptionsEntry.registerClickListener(this, SCREEN_BUTTON_OPTIONS);
 
-		final var lCreditsEntry = new MenuEntry(mScreenManager, lLayout, "Credits");
-		lCreditsEntry.registerClickListener(this, SCREEN_BUTTON_CREDITS);
-
 		final var lExitEntry = new MenuEntry(mScreenManager, lLayout, "Exit");
 		lExitEntry.registerClickListener(this, SCREEN_BUTTON_EXIT);
 
@@ -48,7 +44,6 @@ public class MainMenu extends MenuScreen {
 		lLayout.addMenuEntry(lEditorEntry);
 		lLayout.addMenuEntry(MenuEntry.menuSeparator());
 		lLayout.addMenuEntry(lOptionsEntry);
-		lLayout.addMenuEntry(lCreditsEntry);
 		lLayout.addMenuEntry(MenuEntry.menuSeparator());
 		lLayout.addMenuEntry(lExitEntry);
 
@@ -67,7 +62,7 @@ public class MainMenu extends MenuScreen {
 	protected void handleOnClick() {
 		switch (mClickAction.consume()) {
 		case SCREEN_BUTTON_PLAY:
-			mScreenManager.createLoadingScreen(new GameSelectionScreen(mScreenManager));
+			screenManager().addScreen(new GameSelectionScreen(mScreenManager));
 			break;
 
 		case SCREEN_BUTTON_EDITOR:
@@ -76,10 +71,6 @@ public class MainMenu extends MenuScreen {
 
 		case SCREEN_BUTTON_OPTIONS:
 			screenManager().addScreen(new OptionsScreen(mScreenManager));
-			break;
-
-		case SCREEN_BUTTON_CREDITS:
-			screenManager().addScreen(new Credits(mScreenManager));
 			break;
 
 		case SCREEN_BUTTON_EXIT:

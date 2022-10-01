@@ -48,6 +48,7 @@ public class EditorPauseScreen extends MenuScreen {
 
 		mFilenameEntry = new MenuInputEntry(mScreenManager, lLayout);
 		mFilenameEntry.label("Filename");
+		mFilenameEntry.inputString(mGameFileHeader.trackName());
 		mFilenameEntry.scaleTextToWidth(false);
 
 		final var lSaveEntry = new MenuEntry(mScreenManager, lLayout, "Save");
@@ -81,7 +82,9 @@ public class EditorPauseScreen extends MenuScreen {
 			return;
 
 		case SCREEN_BUTTON_SAVE:
-			saveTrack();
+			if (saveTrack()) {
+				exitScreen();
+			}
 			break;
 
 		case SCREEN_BUTTON_EXIT:

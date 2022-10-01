@@ -2,9 +2,12 @@ package lintfordpickle.ld51.screens;
 
 import org.lwjgl.glfw.GLFW;
 
-import lintfordpickle.ld51.controllers.CameraMovementController;
+import lintfordpickle.ld51.controllers.CameraShipChaseController;
+import lintfordpickle.ld51.controllers.ShipController;
 import lintfordpickle.ld51.controllers.TrackController;
+import lintfordpickle.ld51.data.ships.ShipManager;
 import lintfordpickle.ld51.data.tracks.GameFileHeader;
+import lintfordpickle.ld51.renderers.ShipRenderer;
 import lintfordpickle.ld51.renderers.TrackRenderer;
 import net.lintford.library.controllers.core.ControllerManager;
 import net.lintford.library.core.LintfordCore;
@@ -22,12 +25,15 @@ public class GameScreen extends BaseGameScreen {
 
 	// Data
 	private GameFileHeader mGameFileHeader;
+	private ShipManager mShipManager;
 
 	// Controllers
+	private ShipController mShipController;
 	private TrackController mTrackController;
-	private CameraMovementController mCameraMovementController;
+	private CameraShipChaseController mCameraChaseController;
 
 	// Renderers
+	private ShipRenderer mShipRenderer;
 	private TrackRenderer mTrackRenderer;
 
 	// ---------------------------------------------
@@ -55,6 +61,9 @@ public class GameScreen extends BaseGameScreen {
 	@Override
 	public void initialize() {
 		super.initialize();
+
+		mShipManager = new ShipManager();
+		mShipManager.createPlayerShip();
 
 		final var lCore = screenManager().core();
 		final var lControllerManager = lCore.controllerManager();
@@ -124,18 +133,24 @@ public class GameScreen extends BaseGameScreen {
 	// ---------------------------------------------
 
 	public void createControllers(ControllerManager controllerManager) {
-		final var lIsEditorMode = true;
-		mCameraMovementController = new CameraMovementController(controllerManager, mGameCamera, lIsEditorMode, entityGroupUid());
+		final var lShip = mShipManager.playerShip();
+
+		mCameraChaseController = new CameraShipChaseController(controllerManager, mGameCamera, lShip, entityGroupUid());
 		mTrackController = new TrackController(controllerManager, mGameFileHeader, entityGroupUid());
+		mShipController = new ShipController(controllerManager, mShipManager, entityGroupUid());
 	}
 
 	public void initializeControllers(LintfordCore core) {
-		mCameraMovementController.initialize(core);
+		mCameraChaseController.initialize(core);
 		mTrackController.initialize(core);
+		mShipController.initialize(core);
 	}
 
 	public void createRenderers(LintfordCore core) {
 		mTrackRenderer = new TrackRenderer(mRendererManager, entityGroupUid());
 		mTrackRenderer.initialize(core);
+
+		mShipRenderer = new ShipRenderer(mRendererManager, entityGroupUid());
+		mShipRenderer.initialize(core);
 	}
 }
