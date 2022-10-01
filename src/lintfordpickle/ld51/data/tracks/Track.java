@@ -23,6 +23,8 @@ public class Track {
 	private TrackDefinition mTrackDefinition;
 
 	private Spline mTrackSpline;
+	private transient Spline mHiResTrackSpline;
+
 	private boolean mIsTrackBuilt;
 	private boolean mIsDirty;
 
@@ -44,6 +46,14 @@ public class Track {
 
 	public Spline trackSpline() {
 		return mTrackSpline;
+	}
+
+	public Spline hiResTrackSpline() {
+		return mHiResTrackSpline;
+	}
+
+	public void hiResTrackSpline(Spline cachedHiResSpline) {
+		mHiResTrackSpline = cachedHiResSpline;
 	}
 
 	public float getTrackDistance() {

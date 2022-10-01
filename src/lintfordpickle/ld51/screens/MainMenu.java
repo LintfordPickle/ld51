@@ -67,7 +67,7 @@ public class MainMenu extends MenuScreen {
 	protected void handleOnClick() {
 		switch (mClickAction.consume()) {
 		case SCREEN_BUTTON_PLAY:
-			mScreenManager.createLoadingScreen(new GameScreen(mScreenManager));
+			mScreenManager.createLoadingScreen(new GameSelectionScreen(mScreenManager));
 			break;
 
 		case SCREEN_BUTTON_EDITOR:

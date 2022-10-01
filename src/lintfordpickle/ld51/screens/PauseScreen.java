@@ -1,5 +1,6 @@
 package lintfordpickle.ld51.screens;
 
+import lintfordpickle.ld51.data.tracks.GameFileHeader;
 import net.lintford.library.screenmanager.MenuEntry;
 import net.lintford.library.screenmanager.MenuScreen;
 import net.lintford.library.screenmanager.ScreenManager;
@@ -18,12 +19,16 @@ public class PauseScreen extends MenuScreen {
 	private static final int SCREEN_BUTTON_RESTART = 11;
 	private static final int SCREEN_BUTTON_EXIT = 12;
 
+	private GameFileHeader mGameFileHeader;
+
 	// ---------------------------------------------
 	// Constructor
 	// ---------------------------------------------
 
-	public PauseScreen(ScreenManager screenManager) {
+	public PauseScreen(ScreenManager screenManager, GameFileHeader gameFileHeader) {
 		super(screenManager, TITLE);
+
+		mGameFileHeader = gameFileHeader;
 
 		final var lLayout = new ListLayout(this);
 
@@ -55,6 +60,7 @@ public class PauseScreen extends MenuScreen {
 			return;
 
 		case SCREEN_BUTTON_RESTART:
+			screenManager().createLoadingScreen(new LoadingScreen(screenManager(), true, new GameScreen(screenManager(), mGameFileHeader, false)));
 			break;
 
 		case SCREEN_BUTTON_EXIT:
@@ -62,7 +68,5 @@ public class PauseScreen extends MenuScreen {
 			break;
 
 		}
-
 	}
-
 }
