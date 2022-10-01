@@ -47,12 +47,6 @@ public class GameScreen extends BaseGameScreen {
 		GL11.glClearColor(0.3f, 0.06f, 0.07f, 1.0f);
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 
-		final var lCoreSpritesheet = mCoreSpritesheet;
-		final var lSpriteBatch = rendererManager().uiSpriteBatch();
-
-		lSpriteBatch.begin(core.gameCamera());
-
-		lSpriteBatch.end();
 	}
 
 	// ---------------------------------------------

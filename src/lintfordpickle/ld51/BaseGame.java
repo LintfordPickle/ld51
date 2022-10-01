@@ -21,8 +21,8 @@ public class BaseGame extends LintfordCore {
 	// Entry Point
 	// ---------------------------------------------
 
-	private static final String APP_NAME = "Testbed";
-	private static final String WINDOW_NAME = "TestBed";
+	private static final String APP_NAME = "LD51";
+	private static final String WINDOW_NAME = "LD51 - Tachyon-R II";
 
 	public static void main(String[] args) {
 		GameInfo lGameInfo = new GameInfo() {
