@@ -1,9 +1,8 @@
 package lintfordpickle.ld51.data.ships;
 
-import net.lintford.library.core.entity.CircleEntity;
-import net.lintford.library.core.maths.Vector2f;
+import lintfordpickle.ld51.data.MoveableWorldEntity;
 
-public class Ship extends CircleEntity {
+public class Ship extends MoveableWorldEntity {
 
 	// ---------------------------------------------
 	// Constants
@@ -21,12 +20,12 @@ public class Ship extends CircleEntity {
 	public final ShipProgress shipProgress = new ShipProgress();
 	public final ShipInput shipInput = new ShipInput();
 
-	public final Vector2f frontWheelPosition = new Vector2f();
-	public final Vector2f rearWheelPosition = new Vector2f();
-
 	public boolean isPlayerControlled;
-	public float dr;
-	public float dx, dy;
+
+	// This is the driving angle
+	public float steeringAngle;
+	public float headingAngle;
+	public float headingLength;
 
 	// chasis properties
 	public float width;
@@ -34,27 +33,14 @@ public class Ship extends CircleEntity {
 
 	// ship properties
 	public boolean isDestroyed;
-	public boolean airGlide;
-	public float airGlideAmt; // [-.5, .5]
 	public boolean gasDown;
-	public boolean isSteering;
 
 	// progress
 	public float pointOnLoResTrackX;
 	public float pointOnLoResTrackY;
 	public float loResTrackAngle;
 
-	public float pointOnHiResTrackX;
-	public float pointOnHiResTrackY;
-	public float hiResTrackAngle;
-
 	public float wheelBase;
-	public float heading;
-	public float headingTowards;
-	public float speed;
-
-	public float steerFrontAngle;
-	public float steerRearAngle;
 
 	// ---------------------------------------------
 	// Constructors
@@ -65,8 +51,9 @@ public class Ship extends CircleEntity {
 		this.shipUid = shipUid;
 		shipProgress.shipIndex = shipUid;
 
-		width = 64;
-		height = 128;
-		mRadius = 48;
+		width = 20;
+		height = 10;
+		r = 15;
+		mass = r * 10.f;
 	}
 }

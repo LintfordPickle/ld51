@@ -65,7 +65,7 @@ public class GameScreen extends BaseGameScreen {
 		mShipManager = new ShipManager();
 		mShipManager.createPlayerShip();
 
-		// mShipManager.createAiShips(ShipController.DEFAULT_NUMBER_OPPONENTS);
+		mShipManager.createAiShips(ShipController.DEFAULT_NUMBER_OPPONENTS);
 
 		final var lCore = screenManager().core();
 		final var lControllerManager = lCore.controllerManager();

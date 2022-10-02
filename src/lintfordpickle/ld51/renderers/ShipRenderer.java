@@ -173,7 +173,7 @@ public class ShipRenderer extends BaseRenderer {
 			final float lDestW = lSourceW;
 			final float lDestH = lSourceH;
 
-			mTextureBatch.draw(lTexture, lSourceX, lSourceY, lSourceW, lSourceH, ship.worldPositionX(), ship.worldPositionY(), lDestW, lDestH, -0.01f, ship.heading, 0f, 0f, lScale, 1f, 1f, 1f, 1f);
+			mTextureBatch.draw(lTexture, lSourceX, lSourceY, lSourceW, lSourceH, ship.x(), ship.y(), lDestW, lDestH, -0.01f, ship.headingAngle, 0f, 0f, lScale, 1f, 1f, 1f, 1f);
 		}
 
 		mTextureBatch.end();
@@ -182,34 +182,23 @@ public class ShipRenderer extends BaseRenderer {
 
 		GL11.glPointSize(3.f);
 
-		final var lRearWheelPosition = ship.rearWheelPosition;
+		final var lShipHeading = ship.headingAngle;
+		final var lShipHeadingPosX = ship.x + (float) Math.cos(lShipHeading) * 20.f;
+		final var lShipHeadingPosY = ship.y + (float) Math.sin(lShipHeading) * 20.f;
 
-		final var lShipHeading = ship.heading;
-		final var lShipHeadingPosX = lRearWheelPosition.x + (float) Math.cos(lShipHeading) * 50.f;
-		final var lShipHeadingPosY = lRearWheelPosition.y + (float) Math.sin(lShipHeading) * 50.f;
+		Debug.debugManager().drawers().drawLineImmediate(core.gameCamera(), ship.x, ship.y, lShipHeadingPosX, lShipHeadingPosY, -0.01f, 1.0f, 0.4f, 0.8f);
+		
+		
+		final var lShipSteering = ship.headingAngle + ship.steeringAngle;
+		final var lShipSteeringPosX = ship.x + (float) Math.cos(lShipSteering) * 15.f;
+		final var lShipSteeringPosY = ship.y + (float) Math.sin(lShipSteering) * 15.f;
 
-		final var lShipRearHeading = ship.heading + ship.steerRearAngle;
-		final var lShipRearHeadingPosX = lRearWheelPosition.x + (float) Math.cos(lShipRearHeading) * 15.f;
-		final var lShipRearHeadingPosY = lRearWheelPosition.y + (float) Math.sin(lShipRearHeading) * 15.f;
+		Debug.debugManager().drawers().drawLineImmediate(core.gameCamera(), ship.x, ship.y, lShipSteeringPosX, lShipSteeringPosY, -0.01f, 0.4f, 0.9f, 0.8f);
 
-		final var lFrontWheelPosition = ship.frontWheelPosition;
+		// Draw ship radius
+		Debug.debugManager().drawers().drawCircleImmediate(core.gameCamera(), ship.x, ship.y, ship.radius());
 
-		final var lShipFrontHeading = ship.heading + ship.steerFrontAngle;
-		final var lShipFrontHeadingPosX = lFrontWheelPosition.x + (float) Math.cos(lShipFrontHeading) * 15.f;
-		final var lShipFrontHeadingPosY = lFrontWheelPosition.y + (float) Math.sin(lShipFrontHeading) * 15.f;
-
-		Debug.debugManager().drawers().drawLineImmediate(core.gameCamera(), lFrontWheelPosition.x, lFrontWheelPosition.y, lShipHeadingPosX, lShipHeadingPosY, -0.01f, 1.0f, 0.4f, 0.8f);
-		Debug.debugManager().drawers().drawLineImmediate(core.gameCamera(), lRearWheelPosition.x, lRearWheelPosition.y, lShipRearHeadingPosX, lShipRearHeadingPosY);
-		Debug.debugManager().drawers().drawLineImmediate(core.gameCamera(), lFrontWheelPosition.x, lFrontWheelPosition.y, lShipFrontHeadingPosX, lShipFrontHeadingPosY);
-
-		{
-			final var lShipTrackGradient = ship.headingTowards;
-			final var lShipTrackGradientX = lRearWheelPosition.x + (float) Math.cos(lShipTrackGradient) * 20.f;
-			final var lShipTrackGradientY = lRearWheelPosition.y + (float) Math.sin(lShipTrackGradient) * 20.f;
-
-			Debug.debugManager().drawers().drawLineImmediate(core.gameCamera(), lRearWheelPosition.x, lRearWheelPosition.y, lShipTrackGradientX, lShipTrackGradientY, -0.01f, 0.9f, 0.4f, 0.8f);
-		}
-
+		// Draw position on track
 		{
 			final var lLoResAngle = ship.loResTrackAngle;
 			final var lLoResPointHeadingX = ship.pointOnLoResTrackX + (float) Math.cos(lLoResAngle) * 20.f;
@@ -218,14 +207,10 @@ public class ShipRenderer extends BaseRenderer {
 			Debug.debugManager().drawers().drawLineImmediate(core.gameCamera(), ship.pointOnLoResTrackX, ship.pointOnLoResTrackY, lLoResPointHeadingX, lLoResPointHeadingY, -0.01f, 0.9f, 0.9f, 0.2f);
 		}
 
-		{
-			final var lHiResAngle = ship.hiResTrackAngle;
-			final var lHiResPointHeadingX = ship.pointOnHiResTrackX + (float) Math.cos(lHiResAngle) * 20.f;
-			final var lHiResPointHeadingY = ship.pointOnHiResTrackY + (float) Math.sin(lHiResAngle) * 20.f;
+		drawShipDebugInfo(core, ship);
+	}
 
-			Debug.debugManager().drawers().drawLineImmediate(core.gameCamera(), ship.pointOnHiResTrackX, ship.pointOnHiResTrackY, lHiResPointHeadingX, lHiResPointHeadingY, -0.01f, 0.1f, 0.4f, 0.8f);
-		}
-
+	private void drawShipDebugInfo(LintfordCore core, Ship ship) {
 		if (ship.isPlayerControlled) {
 			final var lFontUnit = rendererManager().uiTextFont();
 			final var lBoundingBox = core.HUD().boundingRectangle();
@@ -241,7 +226,5 @@ public class ShipRenderer extends BaseRenderer {
 			lFontUnit.drawText("current lap: " + ship.shipProgress.currentLapNumber, lBoundingBox.left() + 5.f, yPos += 25f, -0.01f, 1.f);
 			lFontUnit.end();
 		}
-
-		Debug.debugManager().drawers().drawCircleImmediate(core.gameCamera(), ship.worldPositionX(), ship.worldPositionY(), ship.radius());
 	}
 }

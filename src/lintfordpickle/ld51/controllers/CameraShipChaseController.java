@@ -82,8 +82,8 @@ public class CameraShipChaseController extends BaseController {
 		mPosition = new Vector2f();
 		mLookAhead = new Vector2f();
 
-		mPosition.x = trackedCar.worldPositionX();
-		mPosition.y = trackedCar.worldPositionY();
+		mPosition.x = trackedCar.x();
+		mPosition.y = trackedCar.y();
 
 		//
 		mGameCamera = camera;
@@ -162,9 +162,9 @@ public class CameraShipChaseController extends BaseController {
 	}
 
 	private void updateSpring(LintfordCore core) {
-		mStiffness = 14.0f;
-		mDamping = 6.0f;
-		mMass = .5f;
+		mStiffness = 100.0f;
+		mDamping = 10.0f;
+		mMass = 1.f;
 
 		updatewWorldPositions(core);
 		updateWorldZoomFactor(core);
@@ -191,13 +191,13 @@ public class CameraShipChaseController extends BaseController {
 	}
 
 	private void updatewWorldPositions(LintfordCore core) {
-		float lAngle = mTrackedEntity.heading;
+		float lAngle = mTrackedEntity.headingAngle;
 		mLookAhead.x = (float) Math.cos(lAngle);
 		mLookAhead.y = (float) Math.sin(lAngle);
 
-		float lSpeedMod = mTrackedEntity.speed *  0.8f;
-		mDesiredPosition.x = -mTrackedEntity.worldPositionX() - mLookAhead.x * lSpeedMod;
-		mDesiredPosition.y = -mTrackedEntity.worldPositionY() - mLookAhead.y * lSpeedMod;
+		float lSpeedMod = mTrackedEntity.headingLength * 1.8f;
+		mDesiredPosition.x = -mTrackedEntity.x() - mLookAhead.x * lSpeedMod;
+		mDesiredPosition.y = -mTrackedEntity.y() - mLookAhead.y * lSpeedMod;
 	}
 
 	private void updateWorldZoomFactor(LintfordCore core) {
