@@ -7,6 +7,7 @@ import lintfordpickle.ld51.data.ships.Ship;
 import net.lintford.library.core.LintfordCore;
 import net.lintford.library.core.ResourceManager;
 import net.lintford.library.core.debug.Debug;
+import net.lintford.library.core.graphics.linebatch.LineBatch;
 import net.lintford.library.core.graphics.textures.Texture;
 import net.lintford.library.core.graphics.textures.texturebatch.SubPixelTextureBatch;
 import net.lintford.library.renderers.BaseRenderer;
@@ -30,6 +31,8 @@ public class ShipRenderer extends BaseRenderer {
 	protected Texture mShipTexturePlayer;
 	protected Texture mShipTextureEnemy;
 
+	protected LineBatch mColliderLineBatch;
+
 	// ---------------------------------------------
 	// Properties
 	// ---------------------------------------------
@@ -48,6 +51,7 @@ public class ShipRenderer extends BaseRenderer {
 		super(rendererManager, RENDERER_NAME, entityGroupID);
 
 		mTextureBatch = new SubPixelTextureBatch();
+		mColliderLineBatch = new LineBatch();
 	}
 
 	// ---------------------------------------------
@@ -68,6 +72,7 @@ public class ShipRenderer extends BaseRenderer {
 		mShipTextureEnemy = resourceManager.textureManager().loadTexture("TEXTURE_VEHICLE_02", "res/textures/textureShip.png", entityGroupID());
 
 		mTextureBatch.loadResources(resourceManager);
+		mColliderLineBatch.loadResources(resourceManager);
 	}
 
 	@Override
@@ -75,6 +80,7 @@ public class ShipRenderer extends BaseRenderer {
 		super.unloadResources();
 
 		mTextureBatch.unloadResources();
+		mColliderLineBatch.unloadResources();
 	}
 
 	@Override
@@ -94,6 +100,51 @@ public class ShipRenderer extends BaseRenderer {
 		for (int i = 0; i < lNumOfOpponents; i++) {
 			final var lOpponentShip = lListOfOpponents.get(i);
 			drawShip(core, lOpponentShip);
+		}
+
+		drawDebugTrackCollisionLines(core);
+	}
+
+	private void drawDebugTrackCollisionLines(LintfordCore core) {
+		final var lineSegmentInner = mShipController.innerWallSegment;
+		final var lineSegmentOuter = mShipController.outerWallSegment;
+
+		if (lineSegmentInner != null) {
+			mColliderLineBatch.lineType(GL11.GL_LINES);
+			mColliderLineBatch.lineWidth(2);
+			mColliderLineBatch.begin(core.gameCamera());
+			{
+
+				float nx = -(lineSegmentInner.ey - lineSegmentInner.sy);
+				float ny = (lineSegmentInner.ex - lineSegmentInner.sx);
+				float d = (float) Math.sqrt(nx * nx + ny * ny);
+				nx /= d;
+				ny /= d;
+
+				final float r = lineSegmentInner.radius;
+				mColliderLineBatch.draw(lineSegmentInner.sx + nx * r, lineSegmentInner.sy + ny * r, -0.01f, 1.f, 0.f, 0.f, 1.f);
+				mColliderLineBatch.draw(lineSegmentInner.ex + nx * r, lineSegmentInner.ey + ny * r, -0.01f, 1.f, 0.f, 0.f, 1.f);
+
+				mColliderLineBatch.draw(lineSegmentInner.sx - nx * r, lineSegmentInner.sy - ny * r, -0.01f, 1.f, 0.f, 0.f, 1.f);
+				mColliderLineBatch.draw(lineSegmentInner.ex - nx * r, lineSegmentInner.ey - ny * r, -0.01f, 1.f, 0.f, 0.f, 1.f);
+			}
+
+			{
+				float nx = -(lineSegmentOuter.ey - lineSegmentOuter.sy);
+				float ny = (lineSegmentOuter.ex - lineSegmentOuter.sx);
+				float d = (float) Math.sqrt(nx * nx + ny * ny);
+				nx /= d;
+				ny /= d;
+
+				final float r = lineSegmentInner.radius;
+
+				mColliderLineBatch.draw(lineSegmentOuter.sx + nx * r, lineSegmentOuter.sy + ny * r, -0.01f, 1.f, 0.f, 0.f, 1.f);
+				mColliderLineBatch.draw(lineSegmentOuter.ex + nx * r, lineSegmentOuter.ey + ny * r, -0.01f, 1.f, 0.f, 0.f, 1.f);
+
+				mColliderLineBatch.draw(lineSegmentOuter.sx - nx * r, lineSegmentOuter.sy - ny * r, -0.01f, 1.f, 0.f, 0.f, 1.f);
+				mColliderLineBatch.draw(lineSegmentOuter.ex - nx * r, lineSegmentOuter.ey - ny * r, -0.01f, 1.f, 0.f, 0.f, 1.f);
+			}
+			mColliderLineBatch.end();
 		}
 	}
 
@@ -130,50 +181,67 @@ public class ShipRenderer extends BaseRenderer {
 		// DEBUG DRAWERS
 
 		GL11.glPointSize(3.f);
-		Debug.debugManager().drawers().drawPointImmediate(core.gameCamera(), ship.rearWheelPosition.x, ship.rearWheelPosition.y);
-		Debug.debugManager().drawers().drawPointImmediate(core.gameCamera(), ship.frontWheelPosition.x, ship.frontWheelPosition.y);
 
-		// rear wheels
 		final var lRearWheelPosition = ship.rearWheelPosition;
 
 		final var lShipHeading = ship.heading;
-		final var lShipHeadingPosX = lRearWheelPosition.x + (float) Math.cos(lShipHeading) * 10.f;
-		final var lShipHeadingPosY = lRearWheelPosition.y + (float) Math.sin(lShipHeading) * 10.f;
+		final var lShipHeadingPosX = lRearWheelPosition.x + (float) Math.cos(lShipHeading) * 50.f;
+		final var lShipHeadingPosY = lRearWheelPosition.y + (float) Math.sin(lShipHeading) * 50.f;
 
-		final var lShipRearHeading = ship.heading + ship.steerFrontAngle;
-		final var lShipRearHeadingPosX = lRearWheelPosition.x + (float) Math.cos(lShipRearHeading) * 10.f;
-		final var lShipRearHeadingPosY = lRearWheelPosition.y + (float) Math.sin(lShipRearHeading) * 10.f;
+		final var lShipRearHeading = ship.heading + ship.steerRearAngle;
+		final var lShipRearHeadingPosX = lRearWheelPosition.x + (float) Math.cos(lShipRearHeading) * 15.f;
+		final var lShipRearHeadingPosY = lRearWheelPosition.y + (float) Math.sin(lShipRearHeading) * 15.f;
 
-		Debug.debugManager().drawers().drawLineImmediate(core.gameCamera(), lRearWheelPosition.x, lRearWheelPosition.y, lShipHeadingPosX, lShipHeadingPosY);
-		Debug.debugManager().drawers().drawLineImmediate(core.gameCamera(), lRearWheelPosition.x, lRearWheelPosition.y, lShipRearHeadingPosX, lShipRearHeadingPosY);
-
-		// front wheels
 		final var lFrontWheelPosition = ship.frontWheelPosition;
 
-		final var lShipFrontHeading = ship.heading + ship.steerRearAngle;
-		final var lShipFrontHeadingPosX = lFrontWheelPosition.x + (float) Math.cos(lShipFrontHeading) * 10.f;
-		final var lShipFrontHeadingPosY = lFrontWheelPosition.y + (float) Math.sin(lShipFrontHeading) * 10.f;
+		final var lShipFrontHeading = ship.heading + ship.steerFrontAngle;
+		final var lShipFrontHeadingPosX = lFrontWheelPosition.x + (float) Math.cos(lShipFrontHeading) * 15.f;
+		final var lShipFrontHeadingPosY = lFrontWheelPosition.y + (float) Math.sin(lShipFrontHeading) * 15.f;
 
+		Debug.debugManager().drawers().drawLineImmediate(core.gameCamera(), lFrontWheelPosition.x, lFrontWheelPosition.y, lShipHeadingPosX, lShipHeadingPosY, -0.01f, 1.0f, 0.4f, 0.8f);
+		Debug.debugManager().drawers().drawLineImmediate(core.gameCamera(), lRearWheelPosition.x, lRearWheelPosition.y, lShipRearHeadingPosX, lShipRearHeadingPosY);
 		Debug.debugManager().drawers().drawLineImmediate(core.gameCamera(), lFrontWheelPosition.x, lFrontWheelPosition.y, lShipFrontHeadingPosX, lShipFrontHeadingPosY);
 
-		final var lShipTrackGradient = ship.trackAngle;
-		final var lShipTrackGradientX = ship.pointOnTrackX + (float) Math.sin(lShipTrackGradient) * 10.f;
-		final var lShipTrackGradientY = ship.pointOnTrackY + (float) Math.cos(lShipTrackGradient) * 10.f;
+		{
+			final var lShipTrackGradient = ship.headingTowards;
+			final var lShipTrackGradientX = lRearWheelPosition.x + (float) Math.cos(lShipTrackGradient) * 20.f;
+			final var lShipTrackGradientY = lRearWheelPosition.y + (float) Math.sin(lShipTrackGradient) * 20.f;
 
-		Debug.debugManager().drawers().drawPointImmediate(core.gameCamera(), ship.pointOnTrackX, ship.pointOnTrackY);
-		Debug.debugManager().drawers().drawLineImmediate(core.gameCamera(), ship.pointOnTrackX, ship.pointOnTrackY, lShipTrackGradientX, lShipTrackGradientY);
+			Debug.debugManager().drawers().drawLineImmediate(core.gameCamera(), lRearWheelPosition.x, lRearWheelPosition.y, lShipTrackGradientX, lShipTrackGradientY, -0.01f, 0.9f, 0.4f, 0.8f);
+		}
+
+		{
+			final var lLoResAngle = ship.loResTrackAngle;
+			final var lLoResPointHeadingX = ship.pointOnLoResTrackX + (float) Math.cos(lLoResAngle) * 20.f;
+			final var lLoResPointHeadingY = ship.pointOnLoResTrackY + (float) Math.sin(lLoResAngle) * 20.f;
+
+			Debug.debugManager().drawers().drawLineImmediate(core.gameCamera(), ship.pointOnLoResTrackX, ship.pointOnLoResTrackY, lLoResPointHeadingX, lLoResPointHeadingY, -0.01f, 0.9f, 0.9f, 0.2f);
+		}
+
+		{
+			final var lHiResAngle = ship.hiResTrackAngle;
+			final var lHiResPointHeadingX = ship.pointOnHiResTrackX + (float) Math.cos(lHiResAngle) * 20.f;
+			final var lHiResPointHeadingY = ship.pointOnHiResTrackY + (float) Math.sin(lHiResAngle) * 20.f;
+
+			Debug.debugManager().drawers().drawLineImmediate(core.gameCamera(), ship.pointOnHiResTrackX, ship.pointOnHiResTrackY, lHiResPointHeadingX, lHiResPointHeadingY, -0.01f, 0.1f, 0.4f, 0.8f);
+		}
 
 		if (ship.isPlayerControlled) {
 			final var lFontUnit = rendererManager().uiTextFont();
 			final var lBoundingBox = core.HUD().boundingRectangle();
 
 			float yPos = lBoundingBox.top() + 5.f;
+			ship.radius(15.f);
+			final float lDist = (ship.shipProgress.distanceIntoRace / 10.f);
+			final var lDistanceTravelledInM = String.format(java.util.Locale.US, "%.2f", lDist);
 
 			lFontUnit.begin(core.HUD());
 			lFontUnit.drawText("current node: " + ship.shipProgress.currentNodeUid, lBoundingBox.left() + 5.f, yPos += 25f, -0.01f, 1.f);
-			lFontUnit.drawText("distance: " + ship.shipProgress.distanceIntoRace, lBoundingBox.left() + 5.f, yPos += 25f, -0.01f, 1.f);
+			lFontUnit.drawText("distance: " + lDistanceTravelledInM + "m", lBoundingBox.left() + 5.f, yPos += 25f, -0.01f, 1.f);
 			lFontUnit.drawText("current lap: " + ship.shipProgress.currentLapNumber, lBoundingBox.left() + 5.f, yPos += 25f, -0.01f, 1.f);
 			lFontUnit.end();
 		}
+
+		Debug.debugManager().drawers().drawCircleImmediate(core.gameCamera(), ship.worldPositionX(), ship.worldPositionY(), ship.radius());
 	}
 }

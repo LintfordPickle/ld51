@@ -108,9 +108,6 @@ public class TrackController extends BaseController {
 			float lSegmentLength = pSpline.calculateSegmentLength((int) t);
 			float lStepSize = 3.f / (lSegmentLength / 5.f);
 
-			if (t < 5)
-				System.out.println("block length (" + (int) t + "/" + t + "): " + lStepSize + "  (" + lSegmentLength + ")");
-
 			t += lStepSize;
 		}
 
@@ -118,6 +115,34 @@ public class TrackController extends BaseController {
 		lNewSplinePoints.toArray(lSplinePoints);
 
 		return new Spline(lSplinePoints);
+	}
+
+	public TrackDefinition createDefaultTrackDefinition() {
+		final int lDefautlNumControlPoints = 20;
+
+		final var lControlPointsX = new float[lDefautlNumControlPoints];
+		final var lControlPointsY = new float[lDefautlNumControlPoints];
+
+		final var lOriginX = 0.f;
+		final var lOriginY = 0.f;
+
+		final var lRadius = 25.f;
+
+		for (int i = 0; i < lDefautlNumControlPoints; i++) {
+			final float lNormalizedI = (float) i / lDefautlNumControlPoints;
+			lControlPointsX[i] = lOriginX + lRadius * (float) Math.cos(lNormalizedI * Math.PI * 2.f);
+			lControlPointsY[i] = lOriginY + lRadius * (float) Math.sin(lNormalizedI * Math.PI * 2.f);
+		}
+
+		final var lNewTrackDefinition = new TrackDefinition(lControlPointsX, lControlPointsY);
+		return lNewTrackDefinition;
+	}
+
+	protected void buildHiResolutionTrack() {
+		final var lHiResSpline = getHiResSpline(mTrack.trackSpline());
+
+		mTrack.hiResTrackSpline(lHiResSpline);
+		buildTrackCollisionVertices(lHiResSpline);
 	}
 
 	private void buildTrackCollisionVertices(Spline hiResolutionSpline) {
@@ -162,33 +187,5 @@ public class TrackController extends BaseController {
 		// close loop
 		mInnerVertices[lNumSplinePoints] = mInnerVertices[0];
 		mOuterVertices[lNumSplinePoints] = mOuterVertices[0];
-	}
-
-	public TrackDefinition createDefaultTrackDefinition() {
-		final int lDefautlNumControlPoints = 20;
-
-		final var lControlPointsX = new float[lDefautlNumControlPoints];
-		final var lControlPointsY = new float[lDefautlNumControlPoints];
-
-		final var lOriginX = 0.f;
-		final var lOriginY = 0.f;
-
-		final var lRadius = 25.f;
-
-		for (int i = 0; i < lDefautlNumControlPoints; i++) {
-			final float lNormalizedI = (float) i / lDefautlNumControlPoints;
-			lControlPointsX[i] = lOriginX + lRadius * (float) Math.cos(lNormalizedI * Math.PI * 2.f);
-			lControlPointsY[i] = lOriginY + lRadius * (float) Math.sin(lNormalizedI * Math.PI * 2.f);
-		}
-
-		final var lNewTrackDefinition = new TrackDefinition(lControlPointsX, lControlPointsY);
-		return lNewTrackDefinition;
-	}
-
-	protected void buildHiResolutionTrack() {
-		final var lHiResSpline = getHiResSpline(mTrack.trackSpline());
-
-		mTrack.hiResTrackSpline(lHiResSpline);
-		buildTrackCollisionVertices(lHiResSpline);
 	}
 }

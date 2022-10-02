@@ -195,7 +195,7 @@ public class CameraShipChaseController extends BaseController {
 		mLookAhead.x = (float) Math.cos(lAngle);
 		mLookAhead.y = (float) Math.sin(lAngle);
 
-		float lSpeedMod = mTrackedEntity.speed * 0.8f;
+		float lSpeedMod = mTrackedEntity.speed *  0.8f;
 		mDesiredPosition.x = -mTrackedEntity.worldPositionX() - mLookAhead.x * lSpeedMod;
 		mDesiredPosition.y = -mTrackedEntity.worldPositionY() - mLookAhead.y * lSpeedMod;
 	}

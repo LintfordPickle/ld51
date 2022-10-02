@@ -15,7 +15,7 @@ public class ConstantsGame {
 
 	public static final float ASPECT_RATIO = 21.f / 9.f;
 
-	public static final int TRACK_SEG_REG_WIDTH = 90;
+	public static final int TRACK_SEG_REG_WIDTH = 110;
 
 	public static final int GAME_CANVAS_WIDTH = (int) 380;
 	public static final int GAME_CANVAS_HEIGHT = (int) 200;

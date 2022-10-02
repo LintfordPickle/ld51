@@ -10,15 +10,12 @@ import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
-import lintfordpickle.ld51.controllers.EditorTrackController;
 import lintfordpickle.ld51.controllers.TrackController;
 import lintfordpickle.ld51.data.tracks.Track;
 import net.lintford.library.core.LintfordCore;
 import net.lintford.library.core.ResourceManager;
-import net.lintford.library.core.graphics.ColorConstants;
 import net.lintford.library.core.graphics.linebatch.LineBatch;
 import net.lintford.library.core.graphics.shaders.ShaderSubPixel;
-import net.lintford.library.core.graphics.textures.CoreTextureNames;
 import net.lintford.library.core.graphics.textures.Texture;
 import net.lintford.library.core.maths.Matrix4f;
 import net.lintford.library.renderers.BaseRenderer;
@@ -194,14 +191,6 @@ public class TrackRenderer extends BaseRenderer {
 		final var lInnerVertices = mTrackController.innerTrackVertices();
 		final var lOuterVertices = mTrackController.outerTrackVertices();
 
-		float lCurX = 0.f;
-		float lCurY = 0.f;
-		float lPrevX = 0.f;
-		float lPrevY = 0.f;
-
-		float lDistanceTravelled = 0.f;
-		float lLengthOfSegment = 0.f;
-
 		mInnerWallLineBatch.lineType(GL11.GL_LINE_STRIP);
 		mInnerWallLineBatch.lineWidth(4);
 		mOuterWallLineBatch.lineType(GL11.GL_LINE_STRIP);
@@ -212,11 +201,6 @@ public class TrackRenderer extends BaseRenderer {
 
 		final int lNumSplinePoints = lInnerVertices.length;
 		for (int i = 0; i < lNumSplinePoints; i++) {
-			lCurX = lInnerVertices[i].x;
-			lCurY = lInnerVertices[i].y;
-
-			lLengthOfSegment = Vector2f.distance(lCurX, lCurY, lPrevX, lPrevY) / 1024.f;
-			lDistanceTravelled += lLengthOfSegment;
 
 			final float lInnerPointX = lInnerVertices[i].x;
 			final float lInnerPointY = lInnerVertices[i].y;
@@ -241,6 +225,7 @@ public class TrackRenderer extends BaseRenderer {
 		final var lTrack = mTrackController.currentTrack();
 		if (lTrack != null) {
 			final var lSplinePoints = lTrack.trackSpline().points();
+
 			final int lNumPoints = lSplinePoints.size();
 			for (int i = 0; i < lNumPoints; i++) {
 				final var lPoint = lSplinePoints.get(i);
