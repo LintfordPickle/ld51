@@ -1,6 +1,7 @@
 package lintfordpickle.ld51.screens;
 
 import org.lwjgl.glfw.GLFW;
+import org.lwjgl.opengl.GL11;
 
 import lintfordpickle.ld51.controllers.CameraShipChaseController;
 import lintfordpickle.ld51.controllers.ShipController;
@@ -12,8 +13,8 @@ import lintfordpickle.ld51.renderers.TrackRenderer;
 import net.lintford.library.controllers.core.ControllerManager;
 import net.lintford.library.core.LintfordCore;
 import net.lintford.library.core.ResourceManager;
-import net.lintford.library.core.graphics.ColorConstants;
-import net.lintford.library.core.graphics.textures.CoreTextureNames;
+import net.lintford.library.core.debug.Debug;
+import net.lintford.library.core.graphics.rendertarget.RenderTarget;
 import net.lintford.library.screenmanager.ScreenManager;
 import net.lintford.library.screenmanager.screens.BaseGameScreen;
 
@@ -35,6 +36,8 @@ public class GameScreen extends BaseGameScreen {
 	// Renderers
 	private ShipRenderer mShipRenderer;
 	private TrackRenderer mTrackRenderer;
+
+	private RenderTarget mGameCanvasRT;
 
 	// ---------------------------------------------
 	// Properties
@@ -78,13 +81,26 @@ public class GameScreen extends BaseGameScreen {
 	public void loadResources(ResourceManager resourceManager) {
 		super.loadResources(resourceManager);
 
+		mGameCanvasRT = mRendererManager.createRenderTarget("Game Canvas", 150, 100, 1f, GL11.GL_NEAREST, true);
+
 		createRenderers(screenManager().core());
 
 	}
 
 	@Override
+	public void unloadResources() {
+		super.unloadResources();
+
+		mRendererManager.unloadRenderTarget(mGameCanvasRT);
+	}
+
+	@Override
 	public void handleInput(LintfordCore core) {
 		super.handleInput(core);
+
+		if (core.input().keyboard().isKeyDownTimed(GLFW.GLFW_KEY_O)) {
+
+		}
 
 		if (core.input().keyboard().isKeyDownTimed(GLFW.GLFW_KEY_ESCAPE)) {
 			screenManager().addScreen(new PauseScreen(screenManager(), mGameFileHeader));
@@ -99,35 +115,24 @@ public class GameScreen extends BaseGameScreen {
 
 	@Override
 	public void draw(LintfordCore core) {
+		GL11.glClearColor(0.06f, 0.18f, 0.11f, 1.0f);
+		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
+
+		// mGameCanvasRT.bind();
+
 		super.draw(core);
 
-		drawDebugControlPoints(core);
+		// mGameCanvasRT.unbind();
+		// drawBackgroundCanvas(core);
+
 	}
 
-	private void drawDebugControlPoints(LintfordCore core) {
-		if (mTrackController == null)
-			return;
+	private void drawBackgroundCanvas(LintfordCore core) {
+		var lHudRectangle = core.HUD().boundingRectangle();
 
-		if (mTrackController.currentTrack() == null)
-			return;
-
-		final var lSpriteBatch = rendererManager().uiSpriteBatch();
-		final var lPixelSize = 1.f;
-
-		lSpriteBatch.begin(core.gameCamera());
-
-		final var lTrack = mTrackController.currentTrack();
-		if (lTrack != null) {
-			final var lSplinePoints = lTrack.trackSpline().points();
-			final int lNumPoints = lSplinePoints.size();
-			for (int i = 0; i < lNumPoints; i++) {
-				final var lPoint = lSplinePoints.get(i);
-
-				lSpriteBatch.draw(mCoreSpritesheet, CoreTextureNames.TEXTURE_WHITE, lPoint.x, lPoint.y, lPixelSize, lPixelSize, -0.01f, ColorConstants.WHITE);
-			}
-		}
-
-		lSpriteBatch.end();
+		Debug.debugManager().drawers().beginTextureRenderer(core.HUD());
+		Debug.debugManager().drawers().drawRenderTargetImmediate(core, lHudRectangle.left() + 10, lHudRectangle.top() + 5, 500, 500, -1f, mGameCanvasRT);
+		Debug.debugManager().drawers().endTextureRenderer();
 	}
 
 	// ---------------------------------------------

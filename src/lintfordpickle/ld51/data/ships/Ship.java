@@ -22,10 +22,11 @@ public class Ship extends MoveableWorldEntity {
 
 	public boolean isPlayerControlled;
 
+
 	// This is the driving angle
 	public float steeringAngle;
 	public float headingAngle;
-	public float headingLength;
+	public float speed;
 
 	// chasis properties
 	public float width;
@@ -53,7 +54,7 @@ public class Ship extends MoveableWorldEntity {
 
 		width = 20;
 		height = 10;
-		r = 15;
+		r = 10;
 		mass = r * 10.f;
 	}
 }

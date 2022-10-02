@@ -123,31 +123,25 @@ public class CameraShipChaseController extends BaseController {
 			if (core.input().keyboard().isKeyDown(GLFW.GLFW_KEY_A)) {
 				mVelocity.x -= speed;
 				mIsTrackingPlayer = false;
-
 			}
 
 			if (core.input().keyboard().isKeyDown(GLFW.GLFW_KEY_D)) {
 				mVelocity.x += speed;
 				mIsTrackingPlayer = false;
-
 			}
 
 			if (core.input().keyboard().isKeyDown(GLFW.GLFW_KEY_S)) {
 				mVelocity.y += speed;
 				mIsTrackingPlayer = false;
-
 			}
 
 			if (core.input().keyboard().isKeyDown(GLFW.GLFW_KEY_W)) {
 				mVelocity.y -= speed;
 				mIsTrackingPlayer = false;
-
 			}
-
 		}
 
 		return false;
-
 	}
 
 	@Override
@@ -156,8 +150,9 @@ public class CameraShipChaseController extends BaseController {
 			return;
 
 		if (mTrackedEntity != null) {
-			updateSpring(pCore);
-			mGameCamera.setPosition(-mPosition.x, -mPosition.y);
+			mGameCamera.setPosition(mTrackedEntity.x(), mTrackedEntity.y());
+//			updateSpring(pCore);
+//			mGameCamera.setPosition(-mPosition.x, -mPosition.y);
 		}
 	}
 
@@ -195,9 +190,9 @@ public class CameraShipChaseController extends BaseController {
 		mLookAhead.x = (float) Math.cos(lAngle);
 		mLookAhead.y = (float) Math.sin(lAngle);
 
-		float lSpeedMod = mTrackedEntity.headingLength * 1.8f;
-		mDesiredPosition.x = -mTrackedEntity.x() - mLookAhead.x * lSpeedMod;
-		mDesiredPosition.y = -mTrackedEntity.y() - mLookAhead.y * lSpeedMod;
+		float lSpeedMod = mTrackedEntity.speed * 1.8f;
+		mDesiredPosition.x = mTrackedEntity.x() - mLookAhead.x * lSpeedMod;
+		mDesiredPosition.y = mTrackedEntity.y() - mLookAhead.y * lSpeedMod;
 	}
 
 	private void updateWorldZoomFactor(LintfordCore core) {

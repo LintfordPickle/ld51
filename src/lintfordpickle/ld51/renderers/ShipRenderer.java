@@ -182,13 +182,19 @@ public class ShipRenderer extends BaseRenderer {
 
 		GL11.glPointSize(3.f);
 
+		{
+			final var lShipVelocityPosX = ship.x + ship.v.x * 25.f;
+			final var lShipVelocityPosY = ship.y + ship.v.y * 25.f;
+
+			Debug.debugManager().drawers().drawLineImmediate(core.gameCamera(), ship.x, ship.y, lShipVelocityPosX, lShipVelocityPosY, -0.01f, 3.0f, 2.4f, 0.8f);
+		}
+
 		final var lShipHeading = ship.headingAngle;
 		final var lShipHeadingPosX = ship.x + (float) Math.cos(lShipHeading) * 20.f;
 		final var lShipHeadingPosY = ship.y + (float) Math.sin(lShipHeading) * 20.f;
 
 		Debug.debugManager().drawers().drawLineImmediate(core.gameCamera(), ship.x, ship.y, lShipHeadingPosX, lShipHeadingPosY, -0.01f, 1.0f, 0.4f, 0.8f);
-		
-		
+
 		final var lShipSteering = ship.headingAngle + ship.steeringAngle;
 		final var lShipSteeringPosX = ship.x + (float) Math.cos(lShipSteering) * 15.f;
 		final var lShipSteeringPosY = ship.y + (float) Math.sin(lShipSteering) * 15.f;
@@ -216,7 +222,6 @@ public class ShipRenderer extends BaseRenderer {
 			final var lBoundingBox = core.HUD().boundingRectangle();
 
 			float yPos = lBoundingBox.top() + 5.f;
-			ship.radius(15.f);
 			final float lDist = (ship.shipProgress.distanceIntoRace / 10.f);
 			final var lDistanceTravelledInM = String.format(java.util.Locale.US, "%.2f", lDist);
 

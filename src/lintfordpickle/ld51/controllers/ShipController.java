@@ -162,7 +162,7 @@ public class ShipController extends BaseController {
 			lShip.x(lFirstPoint.x);
 			lShip.y(lFirstPoint.y);
 			lShip.headingAngle = lGradiantValue;
-			lShip.headingLength = 0.f;
+			lShip.speed = 0.f;
 			lShip.v.set(0, 0);
 		}
 
@@ -201,29 +201,40 @@ public class ShipController extends BaseController {
 	private void updateShip(LintfordCore core, Ship ship) {
 		final float lDelta = (float) core.gameTime().elapsedTimeMilli() * 0.001f;
 
-		final float INC_STEER_ANGLE_IN_RADIANS = (float) Math.toRadians(2.5f);
+		final float SHIP_MAX_ACCEL_PER_FRAME = 20.f;
+
+		final float MAX_STEER_ANGLE_IN_RADIANS = (float) Math.toRadians(35f);
+		final float INC_STEER_ANGLE_IN_RADIANS = (float) Math.toRadians(2f);
 
 		if (ship.shipInput.isGas) {
-			ship.headingLength += 2.f;// SHIP_MAX_ACCEL_PER_FRAME;
-			ship.v.x += ship.headingLength * (float) Math.cos(+ship.headingAngle) * lDelta;
-			ship.v.y += ship.headingLength * (float) Math.sin(+ship.headingAngle) * lDelta;
+			ship.speed += SHIP_MAX_ACCEL_PER_FRAME;
 		}
 
+		ship.v.x += ship.speed * (float) Math.cos(ship.headingAngle + ship.steeringAngle) * lDelta;
+		ship.v.y += ship.speed * (float) Math.sin(ship.headingAngle + ship.steeringAngle) * lDelta;
+
 		if (ship.shipInput.isTurningLeft) {
-			ship.headingAngle -= INC_STEER_ANGLE_IN_RADIANS;
+			ship.steeringAngle -= INC_STEER_ANGLE_IN_RADIANS;
 		}
 
 		if (ship.shipInput.isTurningRight) {
-			ship.headingAngle += INC_STEER_ANGLE_IN_RADIANS;
+			ship.steeringAngle += INC_STEER_ANGLE_IN_RADIANS;
 		}
 
-		ship.x += lDelta + ship.v.x;
-		ship.y += lDelta + ship.v.y;
+		ship.steeringAngle = MathHelper.clamp(ship.steeringAngle, -MAX_STEER_ANGLE_IN_RADIANS, MAX_STEER_ANGLE_IN_RADIANS);
 
-		ship.v.x *= 0.94f;
-		ship.v.y *= 0.94f;
-		ship.headingLength *= 0.94f;
-		ship.steeringAngle *= 0.94f;
+		final boolean isSteering = ship.shipInput.isTurningLeft || ship.shipInput.isTurningRight;
+		if (isSteering)
+			ship.headingAngle += turnToFace(ship.headingAngle, ship.headingAngle - ship.steeringAngle, 0.025f);
+
+		ship.x += ship.v.x * lDelta;
+		ship.y += ship.v.y * lDelta;
+
+		ship.v.x *= 0.97f;
+		ship.v.y *= 0.97f;
+
+		ship.speed *= 0.97f;
+		ship.steeringAngle *= 0.90f;
 
 		// TODO: Health
 	}
@@ -444,10 +455,10 @@ public class ShipController extends BaseController {
 				wallCollisionBall.mass = ship.mass * 1.f;
 				wallCollisionBall.r = innerWallSegment.radius;
 
-				final var lCollisionPairObject = getFreeCollisionPair();
-				if (lCollisionPairObject != null) {
-					lCollisionPairObject.objectsHaveCollided(ship, wallCollisionBall);
-				}
+//				final var lCollisionPairObject = getFreeCollisionPair();
+//				if (lCollisionPairObject != null) {
+//					lCollisionPairObject.objectsHaveCollided(ship, wallCollisionBall);
+//				}
 
 				// Static collision (keeps you out of the wall)
 				float lOverlap = 1.0f * (distance - ship.radius() - wallCollisionBall.radius());
@@ -482,10 +493,10 @@ public class ShipController extends BaseController {
 				wallCollisionBall.mass = ship.mass * 1.f;
 				wallCollisionBall.r = outerWallSegment.radius;
 
-				final var lCollisionPairObject = getFreeCollisionPair();
-				if (lCollisionPairObject != null) {
-					lCollisionPairObject.objectsHaveCollided(ship, wallCollisionBall);
-				}
+//				final var lCollisionPairObject = getFreeCollisionPair();
+//				if (lCollisionPairObject != null) {
+//					lCollisionPairObject.objectsHaveCollided(ship, wallCollisionBall);
+//				}
 
 				// Static collision (keeps you out of the wall)
 				float lOverlap = 1.0f * (distance - ship.radius() - wallCollisionBall.radius());
