@@ -33,6 +33,12 @@ public class ShipController extends BaseController {
 			obj1 = o1;
 			isActive = true;
 		}
+
+		public void reset() {
+			obj0 = null;
+			obj1 = null;
+			isActive = false;
+		}
 	}
 
 	public CollisionShipPair getFreeCollisionPair() {
@@ -210,8 +216,8 @@ public class ShipController extends BaseController {
 			ship.speed += SHIP_MAX_ACCEL_PER_FRAME;
 		}
 
-		ship.v.x += ship.speed * (float) Math.cos(ship.headingAngle + ship.steeringAngle) * lDelta;
-		ship.v.y += ship.speed * (float) Math.sin(ship.headingAngle + ship.steeringAngle) * lDelta;
+		ship.a.x += ship.speed * (float) Math.cos(ship.headingAngle + ship.steeringAngle);
+		ship.a.y += ship.speed * (float) Math.sin(ship.headingAngle + ship.steeringAngle);
 
 		if (ship.shipInput.isTurningLeft) {
 			ship.steeringAngle -= INC_STEER_ANGLE_IN_RADIANS;
@@ -227,6 +233,8 @@ public class ShipController extends BaseController {
 		if (isSteering)
 			ship.headingAngle += turnToFace(ship.headingAngle, ship.headingAngle - ship.steeringAngle, 0.025f);
 
+		ship.v.x += ship.a.x * lDelta;
+		ship.v.y += ship.a.y * lDelta;
 		ship.x += ship.v.x * lDelta;
 		ship.y += ship.v.y * lDelta;
 
@@ -235,6 +243,16 @@ public class ShipController extends BaseController {
 
 		ship.speed *= 0.97f;
 		ship.steeringAngle *= 0.90f;
+
+		ship.a.x = 0;
+		ship.a.y = 0;
+		ship.wallCollTimer -= lDelta;
+
+		final float lStable = 0.001f;
+		if (Math.abs(ship.v.x * ship.v.x + ship.v.y * ship.v.y) < lStable) {
+			ship.v.x = 0.f;
+			ship.v.y = 0.f;
+		}
 
 		// TODO: Health
 	}
@@ -452,18 +470,21 @@ public class ShipController extends BaseController {
 				wallCollisionBall.y = lClosestPointY;
 				wallCollisionBall.v.x = -ship.v.x;
 				wallCollisionBall.v.y = -ship.v.y;
-				wallCollisionBall.mass = ship.mass * 1.f;
+				wallCollisionBall.mass = ship.mass * .8f;
 				wallCollisionBall.r = innerWallSegment.radius;
 
-//				final var lCollisionPairObject = getFreeCollisionPair();
-//				if (lCollisionPairObject != null) {
-//					lCollisionPairObject.objectsHaveCollided(ship, wallCollisionBall);
-//				}
+				if (ship.wallCollTimer <= 0) {
+					final var lCollisionPairObject = getFreeCollisionPair();
+					if (lCollisionPairObject != null) {
+						lCollisionPairObject.objectsHaveCollided(ship, wallCollisionBall);
+					}
+				}
 
 				// Static collision (keeps you out of the wall)
 				float lOverlap = 1.0f * (distance - ship.radius() - wallCollisionBall.radius());
 				ship.x -= lOverlap * (ship.x - wallCollisionBall.x) / distance;
 				ship.y -= lOverlap * (ship.y - wallCollisionBall.y) / distance;
+				ship.wallCollTimer = 50;
 			}
 		}
 
@@ -490,18 +511,21 @@ public class ShipController extends BaseController {
 				wallCollisionBall.y = lClosestPointY;
 				wallCollisionBall.v.x = -ship.v.x;
 				wallCollisionBall.v.y = -ship.v.y;
-				wallCollisionBall.mass = ship.mass * 1.f;
+				wallCollisionBall.mass = ship.mass * .8f;
 				wallCollisionBall.r = outerWallSegment.radius;
 
-//				final var lCollisionPairObject = getFreeCollisionPair();
-//				if (lCollisionPairObject != null) {
-//					lCollisionPairObject.objectsHaveCollided(ship, wallCollisionBall);
-//				}
+				if (ship.wallCollTimer <= 0) {
+					final var lCollisionPairObject = getFreeCollisionPair();
+					if (lCollisionPairObject != null) {
+						lCollisionPairObject.objectsHaveCollided(ship, wallCollisionBall);
+					}
+				}
 
 				// Static collision (keeps you out of the wall)
 				float lOverlap = 1.0f * (distance - ship.radius() - wallCollisionBall.radius());
 				ship.x -= lOverlap * (ship.x - wallCollisionBall.x) / distance;
 				ship.y -= lOverlap * (ship.y - wallCollisionBall.y) / distance;
+				ship.wallCollTimer = 50;
 			}
 		}
 	}
@@ -563,6 +587,7 @@ public class ShipController extends BaseController {
 	}
 
 	private void handleDynamicCollisions(LintfordCore core) {
+		float lEfficiency = .2f;
 		for (int i = 0; i < MAX_COLLIDERS; i++) {
 			final var c = collidingObjects.get(i);
 			if (c.isActive == false)
@@ -583,23 +608,21 @@ public class ShipController extends BaseController {
 
 			// float dp tangent
 			float dpTan1 = b1.v.x * tx + b1.v.y * ty;
-			float dpTan2 = b1.v.y * tx + b2.v.y * ty;
+			float dpTan2 = b2.v.y * tx + b2.v.y * ty;
 
 			float dpNor1 = b1.v.x * nx + b1.v.y * ny;
-			float dpNor2 = b1.v.y * nx + b2.v.y * ny;
+			float dpNor2 = b2.v.y * nx + b2.v.y * ny;
 
 			// conservation of momemtum (1d)
-			float m1 = (dpNor1 * (b1.mass - b2.mass) + 2.f * b2.mass * dpNor2) / (b1.mass + b2.mass);
-			float m2 = (dpNor2 * (b1.mass - b2.mass) + 2.f * b1.mass * dpNor2) / (b1.mass + b2.mass);
+			float m1 = lEfficiency * (dpNor1 * (b1.mass - b2.mass) + 2.f * b2.mass * dpNor2) / (b1.mass + b2.mass);
+			float m2 = lEfficiency * (dpNor2 * (b2.mass - b1.mass) + 2.f * b1.mass * dpNor1) / (b1.mass + b2.mass);
 
 			b1.v.x = tx * dpTan1 + nx * m1;
 			b1.v.y = ty * dpTan1 + ny * m1;
 			b2.v.x = tx * dpTan2 + nx * m2;
 			b2.v.y = ty * dpTan2 + ny * m2;
 
-			c.obj0 = null;
-			c.obj1 = null;
-			c.isActive = false;
+			c.reset();
 		}
 	}
 

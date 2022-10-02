@@ -22,6 +22,7 @@ public class Ship extends MoveableWorldEntity {
 
 	public boolean isPlayerControlled;
 
+	public float wallCollTimer;
 
 	// This is the driving angle
 	public float steeringAngle;

@@ -11,6 +11,7 @@ public class MoveableWorldEntity extends CircleEntity {
 	// Variables
 	// --------------------------------------
 
+	public final Vector2f a = new Vector2f();
 	public final Vector2f v = new Vector2f();
 	public float mass = 1.f;
 
