@@ -33,6 +33,8 @@ public class Ship extends MoveableWorldEntity {
 	public float width;
 	public float height;
 
+	public float zHeight;
+
 	// ship properties
 	public boolean isDestroyed;
 	public boolean gasDown;
@@ -56,6 +58,7 @@ public class Ship extends MoveableWorldEntity {
 		this.shipUid = shipUid;
 		shipProgress.shipIndex = shipUid;
 
+		zHeight = 0.5f;
 		width = 20;
 		height = 10;
 		r = 10;

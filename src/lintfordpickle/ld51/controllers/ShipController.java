@@ -236,6 +236,7 @@ public class ShipController extends BaseController {
 			break;
 		}
 
+		ship.zHeight = 0.5f + (float) Math.cos(core.gameTime().totalTimeMilli() * 0.001f) * 0.05f;
 		if (ship.shipInput.isHandBrake) {
 			lSpeedMod = 0.30f;
 			lTurnMod = 2.4f;

@@ -174,7 +174,17 @@ public class ShipRenderer extends BaseRenderer {
 			final float lDestW = 32;
 			final float lDestH = 32;
 
-			mTextureBatch.draw(lTexture, lSourceX, lSourceY + 32, lSourceW, -lSourceH, ship.x(), ship.y(), lDestW, lDestH, -0.01f, ship.headingAngle, 0f, 0f, lScale, 1f, 1f, 1f, 1f);
+			float zHeight = ship.zHeight;
+			float shadowX = ship.x() + zHeight * 9.5f;
+			float shadowY = ship.y() + zHeight * 2.0f;
+
+			float shipSx = -zHeight * 0.5f;
+			float shipSy = -zHeight * 0.4f;
+
+			mTextureBatch.draw(lTexture, lSourceX, lSourceY + 32, lSourceW, -lSourceH, shadowX, shadowY, lDestW, lDestH, -0.01f, ship.headingAngle, 0f, 0f, lScale, .04f, .05f, .08f, .3f);
+
+			mTextureBatch.draw(lTexture, lSourceX, lSourceY + 32, lSourceW, -lSourceH, ship.x() + shipSx, ship.y() + shipSy, lDestW, lDestH, -0.01f, ship.headingAngle, 0f, 0f, lScale, 1f, 1f, 1f, 1f);
+
 		}
 
 		mTextureBatch.end();
