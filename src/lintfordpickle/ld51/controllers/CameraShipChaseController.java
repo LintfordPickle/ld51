@@ -196,10 +196,14 @@ public class CameraShipChaseController extends BaseController {
 	}
 
 	private void updateWorldZoomFactor(LintfordCore core) {
-		float lTargetZoom = 1.4f;
-		lTargetZoom = MathHelper.clamp(lTargetZoom, 0.0025f, 0.5f);
 
-		final float lVelStepSize = 0.0075f;
+		final float lZoomInLimit = 1.5f;
+		final float lZoomOutLimit = .45f;
+		final float lDefaultZoom = 0.7f;
+		float lTargetZoom = lDefaultZoom - mTrackedEntity.speed * .75f;
+		lTargetZoom = MathHelper.clamp(lTargetZoom, lZoomOutLimit, lZoomInLimit);
+
+		final float lVelStepSize = 0.175f;
 
 		if (lTargetZoom > mZoomFactor)
 			mZoomVelocity += lVelStepSize;
@@ -209,7 +213,7 @@ public class CameraShipChaseController extends BaseController {
 		mZoomFactor += mZoomVelocity * core.gameTime().elapsedTimeMilli() * 0.001f;
 		mZoomVelocity *= 0.987f;
 		mZoomVelocity = MathHelper.clamp(mZoomVelocity, -0.025f, 0.025f);
-		mZoomFactor = MathHelper.clamp(mZoomFactor, 0.7f, 1.1f);
+		mZoomFactor = MathHelper.clamp(mZoomFactor, lZoomOutLimit, lZoomInLimit);
 
 		mGameCamera.setZoomFactor(mZoomFactor);
 	}

@@ -207,7 +207,7 @@ public class ShipController extends BaseController {
 	private void updateShip(LintfordCore core, Ship ship) {
 		final float lDelta = (float) core.gameTime().elapsedTimeMilli() * 0.001f;
 
-		final float SHIP_MAX_ACCEL_PER_FRAME = 19.f;
+		final float SHIP_MAX_ACCEL_PER_FRAME = 24.f;
 
 		final float INC_STEER_ANGLE_IN_RADIANS = (float) Math.toRadians(2f);
 		final float MAX_STEER_ANGLE_IN_RADIANS = (float) Math.toRadians(35f);
@@ -268,8 +268,13 @@ public class ShipController extends BaseController {
 		ship.x += ship.v.x * lDelta;
 		ship.y += ship.v.y * lDelta;
 
-		ship.v.x *= 0.97f;
-		ship.v.y *= 0.97f;
+		if (!ship.shipInput.isHandBrake) {
+			ship.v.x *= 0.97f;
+			ship.v.y *= 0.97f;
+		} else {
+			ship.v.x *= 0.998f;
+			ship.v.y *= 0.998f;
+		}
 		ship.tiltAmount *= .96f;
 
 		ship.speed *= 0.97f;
