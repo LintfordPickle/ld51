@@ -10,6 +10,7 @@ import net.lintford.library.core.debug.Debug;
 import net.lintford.library.core.graphics.linebatch.LineBatch;
 import net.lintford.library.core.graphics.textures.Texture;
 import net.lintford.library.core.graphics.textures.texturebatch.SubPixelTextureBatch;
+import net.lintford.library.core.maths.MathHelper;
 import net.lintford.library.renderers.BaseRenderer;
 import net.lintford.library.renderers.RendererManager;
 
@@ -165,15 +166,15 @@ public class ShipRenderer extends BaseRenderer {
 			lTexture = mShipTexturePlayer;
 
 		{// MainBody
-			final float lSourceX = 0.f;
-			final float lSourceY = 0.f;
-			final float lSourceW = 27.f;
-			final float lSourceH = 18.f;
+			final float lSourceX = 32.f * ship.tiltLevel;
+			final float lSourceY = ship.tiltAmount > 0.f ? 32.f : 0.f;
+			final float lSourceW = 32.f;
+			final float lSourceH = ship.tiltAmount > 0.f ? -32.f : 32.f;
 
-			final float lDestW = lSourceW;
-			final float lDestH = lSourceH;
+			final float lDestW = 32;
+			final float lDestH = 32;
 
-			mTextureBatch.draw(lTexture, lSourceX, lSourceY, lSourceW, lSourceH, ship.x(), ship.y(), lDestW, lDestH, -0.01f, ship.headingAngle, 0f, 0f, lScale, 1f, 1f, 1f, 1f);
+			mTextureBatch.draw(lTexture, lSourceX, lSourceY + 32, lSourceW, -lSourceH, ship.x(), ship.y(), lDestW, lDestH, -0.01f, ship.headingAngle, 0f, 0f, lScale, 1f, 1f, 1f, 1f);
 		}
 
 		mTextureBatch.end();
@@ -183,8 +184,8 @@ public class ShipRenderer extends BaseRenderer {
 		GL11.glPointSize(3.f);
 
 		{
-			final var lShipVelocityPosX = ship.x + ship.v.x * 25.f;
-			final var lShipVelocityPosY = ship.y + ship.v.y * 25.f;
+			final var lShipVelocityPosX = ship.x + MathHelper.clamp(ship.v.x * 25.f, 0.1f, 15.f);
+			final var lShipVelocityPosY = ship.y + MathHelper.clamp(ship.v.y * 25.f, 0.1f, 15.f);
 
 			Debug.debugManager().drawers().drawLineImmediate(core.gameCamera(), ship.x, ship.y, lShipVelocityPosX, lShipVelocityPosY, -0.01f, 3.0f, 2.4f, 0.8f);
 		}

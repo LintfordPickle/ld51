@@ -44,6 +44,9 @@ public class Ship extends MoveableWorldEntity {
 
 	public float wheelBase;
 
+	public float tiltAmount; // [-1,1]
+	public int tiltLevel; // [0-4]
+
 	// ---------------------------------------------
 	// Constructors
 	// ---------------------------------------------

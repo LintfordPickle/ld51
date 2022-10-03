@@ -207,31 +207,60 @@ public class ShipController extends BaseController {
 	private void updateShip(LintfordCore core, Ship ship) {
 		final float lDelta = (float) core.gameTime().elapsedTimeMilli() * 0.001f;
 
-		final float SHIP_MAX_ACCEL_PER_FRAME = 20.f;
+		final float SHIP_MAX_ACCEL_PER_FRAME = 19.f;
 
-		final float MAX_STEER_ANGLE_IN_RADIANS = (float) Math.toRadians(35f);
 		final float INC_STEER_ANGLE_IN_RADIANS = (float) Math.toRadians(2f);
+		final float MAX_STEER_ANGLE_IN_RADIANS = (float) Math.toRadians(35f);
+
+		float lTurnMod = 1.f;
+		float lSpeedMod = 1.f;
+
+		switch (ship.tiltLevel) {
+		default:
+		case 0:
+			break;
+		case 1:
+			lSpeedMod = 0.97f;
+			break;
+
+		case 2:
+			lSpeedMod = 0.85f;
+			break;
+
+		case 3:
+			lSpeedMod = 0.74f;
+			break;
+
+		case 4:
+			lSpeedMod = 0.65f;
+			break;
+		}
+
+		if (ship.shipInput.isHandBrake) {
+			lSpeedMod = 0.30f;
+			lTurnMod = 2.4f;
+		}
 
 		if (ship.shipInput.isGas) {
 			ship.speed += SHIP_MAX_ACCEL_PER_FRAME;
 		}
 
-		ship.a.x += ship.speed * (float) Math.cos(ship.headingAngle + ship.steeringAngle);
-		ship.a.y += ship.speed * (float) Math.sin(ship.headingAngle + ship.steeringAngle);
+		if (ship.shipInput.isTurningLeft)
+			ship.steeringAngle -= INC_STEER_ANGLE_IN_RADIANS * lTurnMod;
 
-		if (ship.shipInput.isTurningLeft) {
-			ship.steeringAngle -= INC_STEER_ANGLE_IN_RADIANS;
-		}
+		if (ship.shipInput.isTurningRight)
+			ship.steeringAngle += INC_STEER_ANGLE_IN_RADIANS * lTurnMod;
 
-		if (ship.shipInput.isTurningRight) {
-			ship.steeringAngle += INC_STEER_ANGLE_IN_RADIANS;
-		}
-
-		ship.steeringAngle = MathHelper.clamp(ship.steeringAngle, -MAX_STEER_ANGLE_IN_RADIANS, MAX_STEER_ANGLE_IN_RADIANS);
+		ship.tiltAmount = MathHelper.scaleToRange(ship.steeringAngle, -MAX_STEER_ANGLE_IN_RADIANS, MAX_STEER_ANGLE_IN_RADIANS, -1, 1);
+		ship.steeringAngle = MathHelper.clamp(ship.steeringAngle, -MAX_STEER_ANGLE_IN_RADIANS * lTurnMod, MAX_STEER_ANGLE_IN_RADIANS * lTurnMod);
 
 		final boolean isSteering = ship.shipInput.isTurningLeft || ship.shipInput.isTurningRight;
 		if (isSteering)
 			ship.headingAngle += turnToFace(ship.headingAngle, ship.headingAngle - ship.steeringAngle, 0.025f);
+		ship.tiltLevel = MathHelper.clampi(Math.abs((int) (ship.tiltAmount * 5f)), 0, 4);
+
+		ship.a.x += ship.speed * lSpeedMod * (float) Math.cos(ship.headingAngle + ship.steeringAngle);
+		ship.a.y += ship.speed * lSpeedMod * (float) Math.sin(ship.headingAngle + ship.steeringAngle);
 
 		ship.v.x += ship.a.x * lDelta;
 		ship.v.y += ship.a.y * lDelta;
@@ -240,9 +269,12 @@ public class ShipController extends BaseController {
 
 		ship.v.x *= 0.97f;
 		ship.v.y *= 0.97f;
+		ship.tiltAmount *= .96f;
 
 		ship.speed *= 0.97f;
-		ship.steeringAngle *= 0.90f;
+
+		if (!isSteering)
+			ship.steeringAngle *= 0.90f;
 
 		ship.a.x = 0;
 		ship.a.y = 0;

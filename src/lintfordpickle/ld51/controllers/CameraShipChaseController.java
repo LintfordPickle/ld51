@@ -150,16 +150,16 @@ public class CameraShipChaseController extends BaseController {
 			return;
 
 		if (mTrackedEntity != null) {
-			mGameCamera.setPosition(mTrackedEntity.x(), mTrackedEntity.y());
-//			updateSpring(pCore);
-//			mGameCamera.setPosition(-mPosition.x, -mPosition.y);
+//			mGameCamera.setPosition(mTrackedEntity.x(), mTrackedEntity.y());
+			updateSpring(pCore);
+			mGameCamera.setPosition(mPosition.x, mPosition.y);
 		}
 	}
 
 	private void updateSpring(LintfordCore core) {
-		mStiffness = 100.0f;
-		mDamping = 10.0f;
-		mMass = 1.f;
+		mStiffness = 10000.0f;
+		mDamping = 1000.0f;
+		mMass = 100.f;
 
 		updatewWorldPositions(core);
 		updateWorldZoomFactor(core);
@@ -190,9 +190,9 @@ public class CameraShipChaseController extends BaseController {
 		mLookAhead.x = (float) Math.cos(lAngle);
 		mLookAhead.y = (float) Math.sin(lAngle);
 
-		float lSpeedMod = mTrackedEntity.speed * 1.8f;
-		mDesiredPosition.x = mTrackedEntity.x() - mLookAhead.x * lSpeedMod;
-		mDesiredPosition.y = mTrackedEntity.y() - mLookAhead.y * lSpeedMod;
+		float lSpeedMod = mTrackedEntity.speed * 0.2f;
+		mDesiredPosition.x = mTrackedEntity.x() + mLookAhead.x * lSpeedMod;
+		mDesiredPosition.y = mTrackedEntity.y() + mLookAhead.y * lSpeedMod;
 	}
 
 	private void updateWorldZoomFactor(LintfordCore core) {
