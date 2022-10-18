@@ -15,7 +15,7 @@ import lintfordpickle.ld51.data.tracks.Track;
 import net.lintford.library.core.LintfordCore;
 import net.lintford.library.core.ResourceManager;
 import net.lintford.library.core.graphics.linebatch.LineBatch;
-import net.lintford.library.core.graphics.shaders.ShaderSubPixel;
+import net.lintford.library.core.graphics.shaders.ShaderMVP_PCT;
 import net.lintford.library.core.graphics.textures.Texture;
 import net.lintford.library.core.maths.Matrix4f;
 import net.lintford.library.renderers.BaseRenderer;
@@ -54,7 +54,7 @@ public class TrackRenderer extends BaseRenderer {
 	public static final String RENDERER_NAME = "Track Renderer";
 
 	protected static final String VERT_FILENAME = "/res/shaders/shader_basic_pct.vert";
-	protected static final String FRAG_FILENAME = "res/shaders/shaderTrack.frag";
+	protected static final String FRAG_FILENAME = "/res/shaders/shader_basic_pct.frag";
 
 	// ---------------------------------------------
 	// Variables
@@ -66,7 +66,7 @@ public class TrackRenderer extends BaseRenderer {
 	protected int mVboId = -1;
 	protected int mVertexCount = 0;
 
-	protected ShaderSubPixel mShader;
+	protected ShaderMVP_PCT mShader;
 	protected Matrix4f mModelMatrix;
 
 	protected boolean mIsTrackGenerated;
@@ -86,7 +86,7 @@ public class TrackRenderer extends BaseRenderer {
 	public TrackRenderer(RendererManager rendererManager, int entityGroupID) {
 		super(rendererManager, RENDERER_NAME, entityGroupID);
 
-		mShader = new ShaderSubPixel("TrackShader", VERT_FILENAME, FRAG_FILENAME);
+		mShader = new ShaderMVP_PCT("TrackShader", VERT_FILENAME, FRAG_FILENAME);
 
 		mModelMatrix = new Matrix4f();
 
@@ -106,7 +106,6 @@ public class TrackRenderer extends BaseRenderer {
 	@Override
 	public void initialize(LintfordCore pCore) {
 		mTrackController = (TrackController) pCore.controllerManager().getControllerByNameRequired(TrackController.CONTROLLER_NAME, entityGroupID());
-
 	}
 
 	@Override
@@ -184,7 +183,6 @@ public class TrackRenderer extends BaseRenderer {
 		mShader.unbind();
 
 		GL30.glBindVertexArray(0);
-
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
 
 		// TEST

@@ -11,7 +11,6 @@ import net.lintford.library.GameInfo;
 import net.lintford.library.GameResourceLoader;
 import net.lintford.library.core.LintfordCore;
 import net.lintford.library.core.camera.Camera;
-import net.lintford.library.core.debug.GLDebug;
 import net.lintford.library.core.maths.RandomNumbers;
 import net.lintford.library.screenmanager.ScreenManager;
 
@@ -25,7 +24,8 @@ public class BaseGame extends LintfordCore {
 	private static final String WINDOW_NAME = "LD51 - Tachyon-R II";
 
 	public static void main(String[] args) {
-		GameInfo lGameInfo = new GameInfo() {
+
+		final var lGameInfo = new GameInfo() {
 			@Override
 			public String applicationName() {
 				return APP_NAME;
@@ -67,9 +67,7 @@ public class BaseGame extends LintfordCore {
 			}
 		};
 
-		// ExcavationClient def constructor will automatically create a window and load the previous
-		// settings (if they exist).
-		BaseGame lClient = new BaseGame(lGameInfo, args);
+		final var lClient = new BaseGame(lGameInfo, args);
 		lClient.createWindow();
 	}
 
@@ -129,11 +127,10 @@ public class BaseGame extends LintfordCore {
 		super.onLoadResources();
 
 		mGameResourceLoader = new ResourceLoader(mResourceManager, config().display());
+
 		mGameResourceLoader.loadResources(mResourceManager);
 		mGameResourceLoader.setMinimumTimeToShowLogosMs(ConstantsGame.IS_DEBUG_MODE ? 0 : 2000);
 		mGameResourceLoader.loadResourcesInBackground(this);
-
-		GLDebug.checkGLErrorsException();
 
 		mGameCamera = new Camera(mMasterConfig.display());
 		mScreenManager.loadResources(mResourceManager);

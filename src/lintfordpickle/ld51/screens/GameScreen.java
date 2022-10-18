@@ -13,7 +13,6 @@ import lintfordpickle.ld51.renderers.TrackRenderer;
 import net.lintford.library.controllers.core.ControllerManager;
 import net.lintford.library.core.LintfordCore;
 import net.lintford.library.core.ResourceManager;
-import net.lintford.library.core.debug.Debug;
 import net.lintford.library.core.graphics.rendertarget.RenderTarget;
 import net.lintford.library.screenmanager.ScreenManager;
 import net.lintford.library.screenmanager.screens.BaseGameScreen;
@@ -118,21 +117,7 @@ public class GameScreen extends BaseGameScreen {
 		GL11.glClearColor(0.06f, 0.18f, 0.11f, 1.0f);
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 
-		// mGameCanvasRT.bind();
-
 		super.draw(core);
-
-		// mGameCanvasRT.unbind();
-		// drawBackgroundCanvas(core);
-
-	}
-
-	private void drawBackgroundCanvas(LintfordCore core) {
-		var lHudRectangle = core.HUD().boundingRectangle();
-
-		Debug.debugManager().drawers().beginTextureRenderer(core.HUD());
-		Debug.debugManager().drawers().drawRenderTargetImmediate(core, lHudRectangle.left() + 10, lHudRectangle.top() + 5, 500, 500, -1f, mGameCanvasRT);
-		Debug.debugManager().drawers().endTextureRenderer();
 	}
 
 	// ---------------------------------------------

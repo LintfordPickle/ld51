@@ -25,8 +25,8 @@ public class Ship extends MoveableWorldEntity {
 	public float wallCollTimer;
 
 	// This is the driving angle
-	public float steeringAngle;
-	public float headingAngle;
+	public float steeringAngle; // vector we are steering toward (heading+steering)
+	public float headingAngle; // vector we are facing
 	public float speed;
 
 	// chasis properties
@@ -61,7 +61,7 @@ public class Ship extends MoveableWorldEntity {
 		zHeight = 0.5f;
 		width = 20;
 		height = 10;
-		r = 10;
-		mass = r * 10.f;
+		radius = 10;
+		mass = radius * 10.f;
 	}
 }

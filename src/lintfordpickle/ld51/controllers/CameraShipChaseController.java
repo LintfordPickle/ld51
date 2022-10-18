@@ -82,14 +82,12 @@ public class CameraShipChaseController extends BaseController {
 		mPosition = new Vector2f();
 		mLookAhead = new Vector2f();
 
-		mPosition.x = trackedCar.x();
-		mPosition.y = trackedCar.y();
+		mPosition.x = trackedCar.x;
+		mPosition.y = trackedCar.y;
 
-		//
 		mGameCamera = camera;
 		mTrackedEntity = trackedCar;
 		mIsTrackingPlayer = true;
-
 	}
 
 	// ---------------------------------------------
@@ -116,7 +114,7 @@ public class CameraShipChaseController extends BaseController {
 		if (mGameCamera == null)
 			return false;
 
-		if (mAllowManualControl) {
+		if (true || mAllowManualControl) {
 			final float speed = CAMERA_MAN_MOVE_SPEED;
 
 			// Just listener for clicks - couldn't be easier !!?!
@@ -150,9 +148,9 @@ public class CameraShipChaseController extends BaseController {
 			return;
 
 		if (mTrackedEntity != null) {
-//			mGameCamera.setPosition(mTrackedEntity.x(), mTrackedEntity.y());
 			updateSpring(pCore);
-			mGameCamera.setPosition(mPosition.x, mPosition.y);
+
+			mGameCamera.setPosition(-mTrackedEntity.x, -mTrackedEntity.y);
 		}
 	}
 
@@ -191,17 +189,18 @@ public class CameraShipChaseController extends BaseController {
 		mLookAhead.y = (float) Math.sin(lAngle);
 
 		float lSpeedMod = mTrackedEntity.speed * 0.2f;
-		mDesiredPosition.x = mTrackedEntity.x() + mLookAhead.x * lSpeedMod;
-		mDesiredPosition.y = mTrackedEntity.y() + mLookAhead.y * lSpeedMod;
+		mDesiredPosition.x = mTrackedEntity.x + mLookAhead.x * lSpeedMod;
+		mDesiredPosition.y = mTrackedEntity.y + mLookAhead.y * lSpeedMod;
 	}
 
 	private void updateWorldZoomFactor(LintfordCore core) {
 
-		final float lZoomInLimit = 1.5f;
-		final float lZoomOutLimit = .45f;
-		final float lDefaultZoom = 0.7f;
-		float lTargetZoom = lDefaultZoom - mTrackedEntity.speed * .75f;
-		lTargetZoom = MathHelper.clamp(lTargetZoom, lZoomOutLimit, lZoomInLimit);
+		final float lZoomInLimit = 0.5f;
+		final float lZoomOutLimit = 1.5f;
+		final float lDefaultZoom = 1.f;
+
+		float lTargetZoom = lDefaultZoom - mTrackedEntity.speed * 0.05f;
+		lTargetZoom = MathHelper.clamp(lTargetZoom, lZoomInLimit, lZoomOutLimit);
 
 		final float lVelStepSize = 0.175f;
 
@@ -211,11 +210,12 @@ public class CameraShipChaseController extends BaseController {
 			mZoomVelocity -= lVelStepSize;
 
 		mZoomFactor += mZoomVelocity * core.gameTime().elapsedTimeMilli() * 0.001f;
-		mZoomVelocity *= 0.987f;
-		mZoomVelocity = MathHelper.clamp(mZoomVelocity, -0.025f, 0.025f);
-		mZoomFactor = MathHelper.clamp(mZoomFactor, lZoomOutLimit, lZoomInLimit);
 
+		mZoomVelocity = MathHelper.clamp(mZoomVelocity, -0.025f, 0.025f);
+		mZoomFactor = MathHelper.clamp(mZoomFactor, lZoomInLimit, lZoomOutLimit);
 		mGameCamera.setZoomFactor(mZoomFactor);
+
+		mZoomVelocity *= 0.0987f;
 	}
 
 	// ---------------------------------------------

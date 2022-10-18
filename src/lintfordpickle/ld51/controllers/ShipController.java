@@ -117,7 +117,7 @@ public class ShipController extends BaseController {
 	public void initialize(LintfordCore core) {
 		super.initialize(core);
 
-		mTrackController = (TrackController) mControllerManager.getControllerByNameRequired(TrackController.CONTROLLER_NAME, entityGroupID());
+		mTrackController = (TrackController) mControllerManager.getControllerByNameRequired(TrackController.CONTROLLER_NAME, entityGroupUid());
 
 		setupPlayerShip();
 
@@ -132,8 +132,8 @@ public class ShipController extends BaseController {
 			final var lTrackPosition = mTrackController.mTrack.trackSpline().getPointOnSpline(fMarkerMod);
 			final var lTrackGradient = mTrackController.mTrack.trackSpline().getSplineGradient(fMarkerMod);
 
-			lShip.x(lTrackPosition.x);
-			lShip.y(lTrackPosition.y);
+			lShip.x = lTrackPosition.x;
+			lShip.y = lTrackPosition.y;
 			lShip.headingAngle = lTrackGradient;
 		}
 	}
@@ -165,8 +165,8 @@ public class ShipController extends BaseController {
 			final var lFirstPoint = lTrackSpline.points().get(0);
 			final var lGradiantValue = lTrackSpline.getSplineGradient(0.f);
 
-			lShip.x(lFirstPoint.x);
-			lShip.y(lFirstPoint.y);
+			lShip.x = lFirstPoint.x;
+			lShip.y = lFirstPoint.y;
 			lShip.headingAngle = lGradiantValue;
 			lShip.speed = 0.f;
 			lShip.v.set(0, 0);
@@ -209,7 +209,7 @@ public class ShipController extends BaseController {
 
 		final float SHIP_MAX_ACCEL_PER_FRAME = 24.f;
 
-		final float INC_STEER_ANGLE_IN_RADIANS = (float) Math.toRadians(2f);
+		final float INC_STEER_ANGLE_IN_RADIANS = (float) Math.toRadians(1f);
 		final float MAX_STEER_ANGLE_IN_RADIANS = (float) Math.toRadians(35f);
 
 		float lTurnMod = 1.f;
@@ -258,15 +258,16 @@ public class ShipController extends BaseController {
 		final boolean isSteering = ship.shipInput.isTurningLeft || ship.shipInput.isTurningRight;
 		if (isSteering)
 			ship.headingAngle += turnToFace(ship.headingAngle, ship.headingAngle - ship.steeringAngle, 0.025f);
+
 		ship.tiltLevel = MathHelper.clampi(Math.abs((int) (ship.tiltAmount * 5f)), 0, 4);
 
-		ship.a.x += ship.speed * lSpeedMod * (float) Math.cos(ship.headingAngle + ship.steeringAngle);
-		ship.a.y += ship.speed * lSpeedMod * (float) Math.sin(ship.headingAngle + ship.steeringAngle);
+		ship.a.x += ship.speed * lSpeedMod * (float) Math.cos(ship.headingAngle);
+		ship.a.y += ship.speed * lSpeedMod * (float) Math.sin(ship.headingAngle);
 
 		ship.v.x += ship.a.x * lDelta;
 		ship.v.y += ship.a.y * lDelta;
-		ship.x += ship.v.x * lDelta;
-		ship.y += ship.v.y * lDelta;
+		ship.x = ship.x + ship.v.x * lDelta;
+		ship.y = ship.y + ship.v.y * lDelta;
 
 		if (!ship.shipInput.isHandBrake) {
 			ship.v.x *= 0.97f;
@@ -336,7 +337,7 @@ public class ShipController extends BaseController {
 			ship.shipProgress.distanceIntoRace = lTotalDistance;
 
 			final int lCurrentNodeUid = (int) ((ship.shipProgress.currentNodeUid >= lNumControlNodes) ? 0 : ship.shipProgress.currentNodeUid);
-			final float lShipPositionAlongSpling = lTrack.trackSpline().getNormalizedPositionAlongSpline(lCurrentNodeUid, ship.x(), ship.y());
+			final float lShipPositionAlongSpling = lTrack.trackSpline().getNormalizedPositionAlongSpline(lCurrentNodeUid, ship.x, ship.y);
 			final float lTotalNormalizedPosition = lCurrentNodeUid + lShipPositionAlongSpling >= lNumControlNodes ? 0 : lCurrentNodeUid + lShipPositionAlongSpling;
 
 			final var lTrackSplinePoint = lTrack.trackSpline().getPointOnSpline(lTotalNormalizedPosition);
@@ -355,7 +356,7 @@ public class ShipController extends BaseController {
 		final int lLastNodeId = (int) ((ship.shipProgress.currentNodeUid >= lNumControlNodes) ? 0 : ship.shipProgress.currentNodeUid);
 		final var lSegment = lTrack.trackSpline().getControlPoint(lLastNodeId);
 
-		return lTrack.trackSpline().getNormalizedPositionAlongSpline(lLastNodeId, ship.x(), ship.y()) * lSegment.length;
+		return lTrack.trackSpline().getNormalizedPositionAlongSpline(lLastNodeId, ship.x, ship.y) * lSegment.length;
 	}
 
 	// untested
@@ -366,7 +367,7 @@ public class ShipController extends BaseController {
 
 		final int lCurrentNodeUid = (int) ((ship.shipProgress.currentNodeUid >= lNumControlNodes) ? 0 : ship.shipProgress.currentNodeUid);
 
-		final float lShipPositionAlongSpling = lTrack.trackSpline().getNormalizedPositionAlongSpline(lCurrentNodeUid, ship.x(), ship.y());
+		final float lShipPositionAlongSpling = lTrack.trackSpline().getNormalizedPositionAlongSpline(lCurrentNodeUid, ship.x, ship.y);
 		final float lTotalNormalizedPosition = lCurrentNodeUid + lShipPositionAlongSpling >= lNumControlNodes ? 0 : lCurrentNodeUid + lShipPositionAlongSpling;
 
 		final var lOurPositionOnSpline = lTrack.trackSpline().getPointOnSpline(lTotalNormalizedPosition);
@@ -381,8 +382,8 @@ public class ShipController extends BaseController {
 			final float lProjectedNormalizedPosition = (lLookAheadAmount >= lNumControlNodes) ? lLookAheadAmount - lNumControlNodes : lLookAheadAmount;
 			final var lProjectedPointOnSpline = lTrack.trackSpline().getPointOnSpline(lProjectedNormalizedPosition);
 
-			final float lOurPositionX = ship.x();
-			final float lOurPositionY = ship.y();
+			final float lOurPositionX = ship.x;
+			final float lOurPositionY = ship.y;
 
 			final float lHeadingVecX = lProjectedPointOnSpline.x - lOurPositionX;
 			final float lHeadingVecY = lProjectedPointOnSpline.y - lOurPositionY;
@@ -408,7 +409,7 @@ public class ShipController extends BaseController {
 		final int lNumControlNodes = lTrack.trackSpline().numberSplineControlPoints();
 		final int lLastNodeId = (int) ((pShip.shipProgress.currentNodeUid + 1 >= lNumControlNodes) ? 0 : pShip.shipProgress.currentNodeUid);
 
-		return lTrack.trackSpline().getNormalizedPositionAlongSpline(lLastNodeId, pShip.x(), pShip.y());
+		return lTrack.trackSpline().getNormalizedPositionAlongSpline(lLastNodeId, pShip.x, pShip.y);
 	}
 
 	private float getTrackGradientAtVehicleLocation(Ship pShip) {
@@ -454,24 +455,19 @@ public class ShipController extends BaseController {
 
 				final var target = lShipList.get(j);
 
-				if (doCirclesOverlap(ship.x(), ship.y(), ship.radius(), target.x(), target.y(), target.radius())) {
+				if (doCirclesOverlap(ship.x, ship.y, ship.radius, target.x, target.y, target.radius)) {
 					final var lCollisionPairObject = getFreeCollisionPair();
 					if (lCollisionPairObject == null) {
 						// cannot handle more collision
-						// This shouldn't ever happen - either the collision pairs are not being freed (collisions not handled?) or
-						// you have more ships collidiing than in the pool.
-						Debug.debugManager().logger().e(getClass().getSimpleName(), "cannot handle more collision. No more CollisionPair objects!");
-						// return;
-
+						Debug.debugManager().logger().e(getClass().getSimpleName(), "Cannot handle more dynamic collisions this frame!");
 					} else {
 						lCollisionPairObject.objectsHaveCollided(ship, target);
 					}
 
-					// distance between centers
-					float dist = (float) Math.sqrt((ship.x() - target.x()) * (ship.x() - target.x()) + (ship.y() - target.y()) * (ship.y() - target.y()));
-					float overlap = (dist - ship.radius() - target.radius()) * .5f;
+					float dist = (float) Math.sqrt((ship.x - target.x) * (ship.x - target.x) + (ship.y - target.y) * (ship.y - target.y));
+					float overlap = (dist - ship.radius - target.radius) * .5f;
 
-					// Resovle static collision
+					// Resolve static collision
 					ship.x -= overlap * (ship.x - target.x) / dist;
 					ship.y -= overlap * (ship.y - target.y) / dist;
 
@@ -489,8 +485,8 @@ public class ShipController extends BaseController {
 			float lLineX1 = innerWallSegment.ex - innerWallSegment.sx;
 			float lLineY1 = innerWallSegment.ey - innerWallSegment.sy;
 
-			float lLineX2 = ship.x() - innerWallSegment.sx;
-			float lLineY2 = ship.y() - innerWallSegment.sy;
+			float lLineX2 = ship.x - innerWallSegment.sx;
+			float lLineY2 = ship.y - innerWallSegment.sy;
 
 			float lEdgeLength = lLineX1 * lLineX1 + lLineY1 * lLineY1;
 
@@ -500,16 +496,16 @@ public class ShipController extends BaseController {
 			float lClosestPointX = innerWallSegment.sx + t * lLineX1;
 			float lClosestPointY = innerWallSegment.sy + t * lLineY1;
 
-			float distance = (float) Math.sqrt((ship.x() - lClosestPointX) * (ship.x() - lClosestPointX) + (ship.y() - lClosestPointY) * (ship.y() - lClosestPointY));
+			float distance = (float) Math.sqrt((ship.x - lClosestPointX) * (ship.x - lClosestPointX) + (ship.y - lClosestPointY) * (ship.y - lClosestPointY));
 
-			if (distance <= (innerWallSegment.radius + ship.radius())) {
+			if (distance <= (innerWallSegment.radius + ship.radius)) {
 				// Collision detected
 				wallCollisionBall.x = lClosestPointX;
 				wallCollisionBall.y = lClosestPointY;
 				wallCollisionBall.v.x = -ship.v.x;
 				wallCollisionBall.v.y = -ship.v.y;
 				wallCollisionBall.mass = ship.mass * .8f;
-				wallCollisionBall.r = innerWallSegment.radius;
+				wallCollisionBall.radius = innerWallSegment.radius;
 
 				if (ship.wallCollTimer <= 0) {
 					final var lCollisionPairObject = getFreeCollisionPair();
@@ -519,9 +515,9 @@ public class ShipController extends BaseController {
 				}
 
 				// Static collision (keeps you out of the wall)
-				float lOverlap = 1.0f * (distance - ship.radius() - wallCollisionBall.radius());
-				ship.x -= lOverlap * (ship.x - wallCollisionBall.x) / distance;
-				ship.y -= lOverlap * (ship.y - wallCollisionBall.y) / distance;
+				float lOverlap = 1.0f * (distance - ship.radius - wallCollisionBall.radius);
+				ship.x = ship.x - lOverlap * (ship.x - wallCollisionBall.x) / distance;
+				ship.y = ship.y - lOverlap * (ship.y - wallCollisionBall.y) / distance;
 				ship.wallCollTimer = 50;
 			}
 		}
@@ -530,8 +526,8 @@ public class ShipController extends BaseController {
 			float lLineX1 = outerWallSegment.ex - outerWallSegment.sx;
 			float lLineY1 = outerWallSegment.ey - outerWallSegment.sy;
 
-			float lLineX2 = ship.x() - outerWallSegment.sx;
-			float lLineY2 = ship.y() - outerWallSegment.sy;
+			float lLineX2 = ship.x - outerWallSegment.sx;
+			float lLineY2 = ship.y - outerWallSegment.sy;
 
 			float lEdgeLength = lLineX1 * lLineX1 + lLineY1 * lLineY1;
 
@@ -541,16 +537,16 @@ public class ShipController extends BaseController {
 			float lClosestPointX = outerWallSegment.sx + t * lLineX1;
 			float lClosestPointY = outerWallSegment.sy + t * lLineY1;
 
-			float distance = (float) Math.sqrt((ship.x() - lClosestPointX) * (ship.x() - lClosestPointX) + (ship.y() - lClosestPointY) * (ship.y() - lClosestPointY));
+			float distance = (float) Math.sqrt((ship.x - lClosestPointX) * (ship.x - lClosestPointX) + (ship.y - lClosestPointY) * (ship.y - lClosestPointY));
 
-			if (distance <= (outerWallSegment.radius + ship.radius())) {
+			if (distance <= (outerWallSegment.radius + ship.radius)) {
 				// Collision detected
 				wallCollisionBall.x = lClosestPointX;
 				wallCollisionBall.y = lClosestPointY;
 				wallCollisionBall.v.x = -ship.v.x;
 				wallCollisionBall.v.y = -ship.v.y;
 				wallCollisionBall.mass = ship.mass * .8f;
-				wallCollisionBall.r = outerWallSegment.radius;
+				wallCollisionBall.radius = outerWallSegment.radius;
 
 				if (ship.wallCollTimer <= 0) {
 					final var lCollisionPairObject = getFreeCollisionPair();
@@ -560,7 +556,7 @@ public class ShipController extends BaseController {
 				}
 
 				// Static collision (keeps you out of the wall)
-				float lOverlap = 1.0f * (distance - ship.radius() - wallCollisionBall.radius());
+				float lOverlap = 1.0f * (distance - ship.radius - wallCollisionBall.radius);
 				ship.x -= lOverlap * (ship.x - wallCollisionBall.x) / distance;
 				ship.y -= lOverlap * (ship.y - wallCollisionBall.y) / distance;
 				ship.wallCollTimer = 50;
@@ -577,7 +573,7 @@ public class ShipController extends BaseController {
 		final int lNumControlNodes = lTrackSpline.numberSplineControlPoints();
 
 		final int lCurrentNodeUid = (int) ((ship.shipProgress.currentNodeUid >= lNumControlNodes) ? 0 : ship.shipProgress.currentNodeUid);
-		final float lShipPositionAlongSpling = lTrackSpline.getNormalizedPositionAlongSpline(lCurrentNodeUid, ship.x(), ship.y());
+		final float lShipPositionAlongSpling = lTrackSpline.getNormalizedPositionAlongSpline(lCurrentNodeUid, ship.x, ship.y);
 
 		{
 			// behind part

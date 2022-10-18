@@ -6,11 +6,10 @@ import lintfordpickle.ld51.controllers.ShipController;
 import lintfordpickle.ld51.data.ships.Ship;
 import net.lintford.library.core.LintfordCore;
 import net.lintford.library.core.ResourceManager;
-import net.lintford.library.core.debug.Debug;
+import net.lintford.library.core.graphics.ColorConstants;
+import net.lintford.library.core.graphics.batching.TextureBatchPCT;
 import net.lintford.library.core.graphics.linebatch.LineBatch;
 import net.lintford.library.core.graphics.textures.Texture;
-import net.lintford.library.core.graphics.textures.texturebatch.SubPixelTextureBatch;
-import net.lintford.library.core.maths.MathHelper;
 import net.lintford.library.renderers.BaseRenderer;
 import net.lintford.library.renderers.RendererManager;
 
@@ -27,7 +26,7 @@ public class ShipRenderer extends BaseRenderer {
 	// ---------------------------------------------
 
 	protected ShipController mShipController;
-	private SubPixelTextureBatch mTextureBatch;
+	private TextureBatchPCT mTextureBatch;
 
 	protected Texture mShipTexturePlayer;
 	protected Texture mShipTextureEnemy;
@@ -51,7 +50,7 @@ public class ShipRenderer extends BaseRenderer {
 	public ShipRenderer(RendererManager rendererManager, int entityGroupID) {
 		super(rendererManager, RENDERER_NAME, entityGroupID);
 
-		mTextureBatch = new SubPixelTextureBatch();
+		mTextureBatch = new TextureBatchPCT();
 		mColliderLineBatch = new LineBatch();
 	}
 
@@ -175,54 +174,52 @@ public class ShipRenderer extends BaseRenderer {
 			final float lDestH = 32;
 
 			float zHeight = ship.zHeight;
-			float shadowX = ship.x() + zHeight * 9.5f;
-			float shadowY = ship.y() + zHeight * 2.0f;
+			float shadowX = ship.x + zHeight * 9.5f;
+			float shadowY = ship.y + zHeight * 2.0f;
 
 			float shipSx = -zHeight * 0.5f;
 			float shipSy = -zHeight * 0.4f;
 
-			mTextureBatch.draw(lTexture, lSourceX, lSourceY + 32, lSourceW, -lSourceH, shadowX, shadowY, lDestW, lDestH, -0.01f, ship.headingAngle, 0f, 0f, lScale, .04f, .05f, .08f, .3f);
-
-			mTextureBatch.draw(lTexture, lSourceX, lSourceY + 32, lSourceW, -lSourceH, ship.x() + shipSx, ship.y() + shipSy, lDestW, lDestH, -0.01f, ship.headingAngle, 0f, 0f, lScale, 1f, 1f, 1f, 1f);
-
+			mTextureBatch.drawAroundCenter(lTexture, lSourceX, lSourceY + 32, lSourceW, -lSourceH, shadowX, shadowY, lDestW, lDestH, -0.01f, ship.headingAngle, 0f, 0f, lScale, ColorConstants.BLACK);
+			mTextureBatch.drawAroundCenter(lTexture, lSourceX, lSourceY + 32, lSourceW, -lSourceH, ship.x + shipSx, ship.y + shipSy, lDestW, lDestH, -0.01f, ship.headingAngle, 0f, 0f, lScale, ColorConstants.WHITE);
 		}
 
 		mTextureBatch.end();
 
 		// DEBUG DRAWERS
 
-		GL11.glPointSize(3.f);
-
-		{
-			final var lShipVelocityPosX = ship.x + MathHelper.clamp(ship.v.x * 25.f, 0.1f, 15.f);
-			final var lShipVelocityPosY = ship.y + MathHelper.clamp(ship.v.y * 25.f, 0.1f, 15.f);
-
-			Debug.debugManager().drawers().drawLineImmediate(core.gameCamera(), ship.x, ship.y, lShipVelocityPosX, lShipVelocityPosY, -0.01f, 3.0f, 2.4f, 0.8f);
-		}
-
-		final var lShipHeading = ship.headingAngle;
-		final var lShipHeadingPosX = ship.x + (float) Math.cos(lShipHeading) * 20.f;
-		final var lShipHeadingPosY = ship.y + (float) Math.sin(lShipHeading) * 20.f;
-
-		Debug.debugManager().drawers().drawLineImmediate(core.gameCamera(), ship.x, ship.y, lShipHeadingPosX, lShipHeadingPosY, -0.01f, 1.0f, 0.4f, 0.8f);
-
-		final var lShipSteering = ship.headingAngle + ship.steeringAngle;
-		final var lShipSteeringPosX = ship.x + (float) Math.cos(lShipSteering) * 15.f;
-		final var lShipSteeringPosY = ship.y + (float) Math.sin(lShipSteering) * 15.f;
-
-		Debug.debugManager().drawers().drawLineImmediate(core.gameCamera(), ship.x, ship.y, lShipSteeringPosX, lShipSteeringPosY, -0.01f, 0.4f, 0.9f, 0.8f);
-
-		// Draw ship radius
-		Debug.debugManager().drawers().drawCircleImmediate(core.gameCamera(), ship.x, ship.y, ship.radius());
-
-		// Draw position on track
-		{
-			final var lLoResAngle = ship.loResTrackAngle;
-			final var lLoResPointHeadingX = ship.pointOnLoResTrackX + (float) Math.cos(lLoResAngle) * 20.f;
-			final var lLoResPointHeadingY = ship.pointOnLoResTrackY + (float) Math.sin(lLoResAngle) * 20.f;
-
-			Debug.debugManager().drawers().drawLineImmediate(core.gameCamera(), ship.pointOnLoResTrackX, ship.pointOnLoResTrackY, lLoResPointHeadingX, lLoResPointHeadingY, -0.01f, 0.9f, 0.9f, 0.2f);
-		}
+//		GL11.glPointSize(3.f);
+//
+//		{
+//			final var lShipVelocityPosX = ship.x + MathHelper.clamp(ship.v.x * 25.f, 0.1f, 15.f);
+//			final var lShipVelocityPosY = ship.y + MathHelper.clamp(ship.v.y * 25.f, 0.1f, 15.f);
+//
+//			Debug.debugManager().drawers().drawLineImmediate(core.gameCamera(), ship.x, ship.y, lShipVelocityPosX, lShipVelocityPosY, -0.01f, 3.0f, 2.4f, 0.8f);
+//		}
+//
+//		final var lShipHeading = ship.headingAngle;
+//		final var lShipHeadingPosX = ship.x + (float) Math.cos(lShipHeading) * 20.f;
+//		final var lShipHeadingPosY = ship.y + (float) Math.sin(lShipHeading) * 20.f;
+//
+//		Debug.debugManager().drawers().drawLineImmediate(core.gameCamera(), ship.x, ship.y, lShipHeadingPosX, lShipHeadingPosY, -0.01f, 1.0f, 0.4f, 0.8f);
+//
+//		final var lShipSteering = ship.headingAngle + ship.steeringAngle;
+//		final var lShipSteeringPosX = ship.x + (float) Math.cos(lShipSteering) * 15.f;
+//		final var lShipSteeringPosY = ship.y + (float) Math.sin(lShipSteering) * 15.f;
+//
+//		Debug.debugManager().drawers().drawLineImmediate(core.gameCamera(), ship.x, ship.y, lShipSteeringPosX, lShipSteeringPosY, -0.01f, 0.4f, 0.9f, 0.8f);
+//
+//		// Draw ship radius
+//		Debug.debugManager().drawers().drawCircleImmediate(core.gameCamera(), ship.x, ship.y, ship.radius);
+//
+//		// Draw position on track
+//		{
+//			final var lLoResAngle = ship.loResTrackAngle;
+//			final var lLoResPointHeadingX = ship.pointOnLoResTrackX + (float) Math.cos(lLoResAngle) * 20.f;
+//			final var lLoResPointHeadingY = ship.pointOnLoResTrackY + (float) Math.sin(lLoResAngle) * 20.f;
+//
+//			Debug.debugManager().drawers().drawLineImmediate(core.gameCamera(), ship.pointOnLoResTrackX, ship.pointOnLoResTrackY, lLoResPointHeadingX, lLoResPointHeadingY, -0.01f, 0.9f, 0.9f, 0.2f);
+//		}
 
 		drawShipDebugInfo(core, ship);
 	}
